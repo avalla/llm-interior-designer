@@ -37,6 +37,13 @@ code and a licensed professional are authoritative.
 | Floor occupancy, habitable rooms | - | <= 40% | interioragent (VLM target 0.4) | automatic |
 | TV relative to windows | not above/in front of/next to one on the same wall (>= 1 m) | side wall >= 1.5 m | Astra par. 11 | automatic |
 | Assembly of tall units | diagonal (height x depth) <= room height - 2 cm | - | assembly practice | automatic |
+| Placement tolerance | every measure >= minimum + 2 x 2 cm | - | survey and installation tolerances (Astra par. 15) | automatic (Robustness) |
+| Appliance doors (fridge, oven, dishwasher) | 70 cm clear with the door open | 90 cm | common ergonomics | automatic (access zones) |
+| Hob landing | 40 cm each side | 55 cm | common ergonomics | manual (F21) |
+| WC / bidet axes | 80 cm between axes, 40 cm from axis to wall | - | common ergonomics | manual |
+| Shower or bath open side | 60 cm splash zone free of electrical items | - | electrical safety practice (check local code) | automatic (Safety) |
+| Shared destinations | reachable without crossing a private room | - | Astra par. 6, pattern P02 | automatic (Privacy) |
+| WC and bed from the entrance | not visible with doors open | - | Astra par. 6 | automatic when `no_view` is declared |
 
 ## Minimum areas (reference DM 5/7/1975, indicative)
 

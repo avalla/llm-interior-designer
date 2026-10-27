@@ -12,6 +12,8 @@ import interiors  # noqa: E402
 importlib.reload(interiors)
 from interiors import *  # noqa: E402,F403
 
+# PARAMS: values varied by tools/explore.py (variant exploration); defaults = chosen design
+PARAMS = globals().get("PARAMS", {})
 new_project("Apartment", HERE, interior=(0.30, 0.30, 12.20, 7.70), height=2.70)
 c = COL
 FA = RULES["armored_frame"]
@@ -83,21 +85,29 @@ add("Bookcase", Part.makeCompound(shelf), c["OAK"], g)
 tv("TV_65")
 
 g = "Dining"
-TX, TY, TR = 5.35, 6.10, 0.55
+TX, TY, TR = PARAMS.get("table_x", 5.35), PARAMS.get("table_y", 6.10), 0.55
 cyl("Table_Base", TX, TY, 0, 0.28, 0.03, c["BLACK"], g, item="Table")
 cyl("Table_Leg", TX, TY, 0.03, 0.06, 0.69, c["BLACK"], g, item="Table")
 cyl("Table_Top", TX, TY, 0.72, TR, 0.03, c["OAK"], g, item="Table")
-for i, (dx, dy) in enumerate([(-1, 0), (1, 0), (0, -1), (0, 1)]):   # 1=west 2=east 3=south 4=north
-    chair("Chair_%d" % (i + 1), TX + dx * 0.75, TY + dy * 0.75, dx, dy, g, "Table", TR)
+# 3 fixed chairs: an east chair would sit on the entrance -> night zone route (pre-mortem S03); a 4th is a folding chair
+for i, (dx, dy) in [(1, (-1, 0)), (3, (0, -1)), (4, (0, 1))]:   # 1=west 3=south 4=north
+    chair("Chair_%d" % i, TX + dx * 0.75, TY + dy * 0.75, dx, dy, g, "Table", TR)
 height_match("Table / chairs", 0.75, 0.47)
 
 g = "Kitchen"
-box("Tall_Units_Fridge_Oven", 0.30, 5.00, 0, 0.90, 7.70, 2.30, c["WHITE"], g)
-box("Plinth", 0.90, 7.15, 0, 4.20, 7.70, 0.10, c["BLACK"], g, item="Base_Units")
-box("Base_Units", 0.90, 7.10, 0.10, 4.20, 7.70, 0.86, c["WHITE"], g, item="Base_Units")
-box("Worktop", 0.90, 7.05, 0.86, 4.20, 7.70, 0.90, c["BLACK"], g, item="Base_Units")
+# tall column stops at the worktop line; the base run turns the corner with a carousel unit (pre-mortem S11)
+box("Tall_Units_Fridge_Oven", 0.30, 5.00, 0, 0.90, 7.05, 2.30, c["WHITE"], g)
+box("Plinth", 0.30, 7.15, 0, 4.50, 7.70, 0.10, c["BLACK"], g, item="Base_Units")
+box("Base_Units", 0.30, 7.10, 0.10, 4.50, 7.70, 0.86, c["WHITE"], g, item="Base_Units")
+box("Worktop", 0.30, 7.05, 0.86, 4.50, 7.70, 0.90, c["BLACK"], g, item="Base_Units")
+# appliance doors with a person in front (pre-mortem S07, S08)
+hinged("Fridge_Door", 0.90, 6.40, (0, -1), (1, 0), 0.60, hgt=1.85, leaf=False, kind="Appliance door", handle=False,
+       own="Tall_Units_Fridge_Oven")
+access_zone("Kitchen: in front of fridge", 0.91, 5.80, 1.61, 6.40, ("Tall_Units_Fridge_Oven",), depth=0.70)
+access_zone("Kitchen: in front of oven", 0.91, 5.05, 1.61, 5.75, ("Tall_Units_Fridge_Oven",))
+access_zone("Kitchen: dishwasher door open", 2.70, 6.34, 3.30, 7.045, ("Base_Units",), depth=0.705)
 box("Island_Base", 1.80, 5.40, 0, 3.70, 6.10, 0.90, c["WHITE"], g, item="Island")
-box("Island_Top", 1.75, 5.05, 0.90, 3.75, 6.15, 0.94, c["OAK"], g, item="Island")
+box("Island_Top", 1.75, 5.05, 0.90, 3.75, 6.10, 0.94, c["OAK"], g, item="Island")   # aisle 95 cm: 90 was at zero margin
 for i, x in enumerate((2.15, 2.75, 3.35)):
     n = "Stool_%d" % (i + 1)
     cyl(n + "_Seat", x, 4.85, 0.62, 0.19, 0.05, c["BLACK"], g, item=n)
@@ -107,13 +117,13 @@ height_match("Island / stools", 0.94, 0.67)
 
 g = "Entrance"
 box("Entrance_Wardrobe", 6.95, 4.85, 0, 7.95, 5.30, 2.40, c["WHITE"], g)
-hinged("Entrance_Wardrobe_Leaf_1", 6.95, 5.30, (1, 0), (0, 1), 0.50, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False)
-hinged("Entrance_Wardrobe_Leaf_2", 7.95, 5.30, (-1, 0), (0, 1), 0.50, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False)
+hinged("Entrance_Wardrobe_Leaf_1", 6.95, 5.30, (1, 0), (0, 1), 0.50, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False, own="Entrance_Wardrobe")
+hinged("Entrance_Wardrobe_Leaf_2", 7.95, 5.30, (-1, 0), (0, 1), 0.50, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False, own="Entrance_Wardrobe")
 access_zone("Entrance: in front of wardrobe", 6.96, 5.305, 7.92, 6.01, ("Entrance_Wardrobe",))
 
 g = "Night_Hall"
 box("Utility_Cupboard", 11.75, 3.65, 0, 12.20, 4.75, 2.40, c["WHITE"], g)
-hinged("Utility_Cupboard_Leaf", 11.75, 3.70, (0, 1), (-1, 0), 0.90, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False)
+# sliding fronts: a 90 cm hinged leaf swept the 1.10 m hall and blocked the closet door (S19, P17)
 
 g = "Bedroom"
 box("Bed_Headboard", 12.08, 0.95, 0.01, 12.20, 2.95, 1.10, c["GREY"], g, item="Bed")
@@ -140,9 +150,10 @@ box("Washbasin", 8.10, 5.90, 0.85, 8.50, 6.50, 0.97, c["WHITE"], g, item="Washba
 cyl("Washbasin_Tap", 8.12, 6.20, 0.97, 0.015, 0.20, c["STEEL"], g, item="Washbasin")
 box("WC_Wall_Hung", 9.70, 5.97, 0.25, 10.25, 6.33, 0.40, c["WHITE"], g, item="WC")
 box("WC_Lid", 9.72, 5.99, 0.40, 10.20, 6.31, 0.43, c["WHITE"], g, item="WC")
-box("Bidet_Wall_Hung", 9.70, 5.20, 0.25, 10.25, 5.56, 0.40, c["WHITE"], g)
+box("Bidet_Wall_Hung", 9.70, 5.15, 0.25, 10.25, 5.51, 0.40, c["WHITE"], g)   # 82 cm between axes (S22)
 box("Shower_Tray", 8.05, 6.70, 0.004, 9.45, 7.70, 0.03, c["WHITE"], g)
-box("Shower_Glass", 8.05, 6.70, 0.03, 8.85, 6.71, 2.00, c["GLASS"], g, tr=60)
+box("Shower_Glass", 8.05, 6.70, 0.03, 8.75, 6.71, 2.00, c["GLASS"], g, tr=60)
+box("Shower_Glass_East", 9.44, 6.71, 0.03, 9.45, 7.70, 2.00, c["GLASS"], g, tr=60)   # closes the side towards the machine (S20)
 box("Washing_Machine", 9.65, 7.10, 0, 10.25, 7.70, 0.85, c["WHITE"], g)
 
 g = "Walk_in_Closet"
@@ -182,8 +193,8 @@ box("Rug", 1.20, 0.80, 0, 4.00, 3.60, 0.01, c["RUG"], "Living", check=False)
 cyl("Floor_Lamp_Base", 1.05, 0.70, 0, 0.15, 0.03, c["BLACK"], "Living", item="Floor_Lamp")
 cyl("Floor_Lamp_Stem", 1.05, 0.70, 0.03, 0.015, 1.50, c["BLACK"], "Living", item="Floor_Lamp")
 cyl("Floor_Lamp_Shade", 1.05, 0.70, 1.50, 0.20, 0.25, c["WHITE"], "Living", item="Floor_Lamp")
-cyl("Plant_Pot", 5.85, 3.35, 0, 0.20, 0.45, c["TERRA"], "Living", item="Plant")
-add("Plant_Foliage", Part.makeSphere(0.35 * S, V(5.85 * S, 3.35 * S, 0.95 * S)), c["GREEN"], "Living", item="Plant")
+cyl("Plant_Pot", 0.65, 4.30, 0, 0.20, 0.45, c["TERRA"], "Living", item="Plant")   # moved off the night-door track (S15)
+add("Plant_Foliage", Part.makeSphere(0.35 * S, V(0.65 * S, 4.30 * S, 0.95 * S)), c["GREEN"], "Living", item="Plant")
 cyl("Pendant_Table", TX, TY, 1.75, 0.25, 0.18, c["BLACK"], "Dining", item="Pendant_Table")
 cyl("Pendant_Table_Cord", TX, TY, 1.93, 0.005, 2.70 - 1.93, c["BLACK"], "Dining", item="Pendant_Table")
 for i, x in enumerate((2.35, 3.15)):
@@ -192,9 +203,10 @@ for i, x in enumerate((2.35, 3.15)):
 box("Hob", 3.35, 7.15, 0.90, 3.95, 7.65, 0.905, (0.05, 0.05, 0.05), "Kitchen")
 box("Sink", 1.90, 7.20, 0.90, 2.70, 7.60, 0.91, c["STEEL"], "Kitchen")
 cyl("Tap", 2.30, 7.63, 0.91, 0.02, 0.20, c["STEEL"], "Kitchen")       # top 1.11 < sill 1.20
-box("Wall_Units_East", 3.25, 7.35, 1.50, 4.20, 7.70, 2.30, c["WHITE"], "Kitchen")
+box("Wall_Units_East", 3.25, 7.35, 1.50, 4.50, 7.70, 2.30, c["WHITE"], "Kitchen")   # hob landing 55 cm (S09)
 box("Integrated_Hood", 3.35, 7.35, 1.40, 3.95, 7.70, 1.50, c["STEEL"], "Kitchen")
 box("Entrance_Mirror", 7.93, 5.85, 1.00, 7.95, 6.65, 2.00, c["GLASS"], "Entrance", tr=30)
+box("Entrance_Console", 7.65, 6.05, 0.75, 7.95, 6.70, 0.80, c["OAK"], "Entrance")   # landing surface, P03 (S02)
 box("Entrance_Mat", 6.90, 6.90, 0, 7.65, 7.40, 0.01, c["DARK"], "Entrance", check=False)
 box("Bedroom_Rug", 9.30, 0.60, 0, 11.60, 3.30, 0.01, c["RUG"], "Bedroom", check=False)
 box("Bathroom_Mirror", 8.05, 5.85, 1.10, 8.07, 6.55, 1.90, c["GLASS"], "Bathroom", tr=30)
@@ -220,8 +232,13 @@ destination("Bathroom: shower", 9.00, 7.20)
 destination("Closet: in front of units", 11.10, 6.00)
 destination("Night hall: utility cupboard", 11.30, 4.20)
 route("Night route bed -> WC", "Bedroom: bed north side", "Bathroom: WC")
+electrical("Washing_Machine", "Towel_Warmer")
+wet_zone("Shower open side (south)", 8.75, 6.10, 9.44, 6.70)
+private_room("Bedroom")
+no_view("Entrance: WC not visible", (7.10, 7.25), "WC_Wall_Hung")
+no_view("Entrance: bed not visible", (7.10, 7.25), "Bed_Frame")
 
-clearance("Entrance -> night zone: east chair / entrance wardrobe", "Chair_2", "Entrance_Wardrobe", 0.80, 0.90)
+clearance("Entrance -> night zone: table / entrance wardrobe", "Table_Top", "Entrance_Wardrobe", 0.80, 0.90)
 clearance("Entrance -> night zone: south chair / partition", "Chair_3", "Partition_Living", 0.80, 0.90)
 clearance("Kitchen: island / base units", "Island_Top", "Worktop", 0.90, 1.10)
 clearance("Kitchen: island / tall units", "Island_Top", "Tall_Units_Fridge_Oven", 0.80, 0.90)
@@ -231,6 +248,19 @@ clearance("Bedroom: bed north side", "Bed_Frame", "Partition_Bedroom", 0.60, 0.7
 clearance("Closet: in front of east unit", "Closet_Unit_East", "Partition_Bathroom_Closet", 0.90, 1.00)
 
 not_verifiable("Living window 4.60 m rough opening", "lintel to be sized by a structural engineer")
+not_verifiable("Bathroom and closet ventilation", "mechanical extraction to be designed (pre-mortem S21, S25)")
+not_verifiable("Bedroom acoustics", "10 cm partition next to the dining area; specify an acoustic partition (S16)")
+
+# ======================= REQUIREMENTS (ids as in brief.md) =======================
+requirement("R01", "Bathroom, kitchen, bedroom, wardrobe, hall", ("Routes/Bathroom*", "Routes/Kitchen*", "Routes/Bedroom*", "Routes/Closet*"),
+            ("WC_Wall_Hung", "Base_Units", "Bed_Frame", "Closet_Unit_East", "Partition_Hall_North"))
+requirement("R02", "Doors open without hitting fixtures or furniture", ("Openings/*", "Handles/*", "Reveals/*"))
+requirement("R03", "Entrance open to the living area", satisfied_by=("Door_Entrance_Leaf",), manual=True)
+requirement("R04", "Night zone closed by a door", ("Openings/Door_Night_Zone*", "Privacy/*"), ("Door_Night_Zone_Leaf",))
+requirement("R05", "Rooms that do not feel oppressive", ("Light and air/*occupancy",))
+requirement("R06", "Modern style", manual=True)
+requirement("R07", "TV not next to a window on the same wall", ("Brief constraints/TV*",), ("TV_65",))
+requirement("R08", "Daylight in habitable rooms", ("Light and air/Living area", "Light and air/Bedroom"))
 
 # ======================= PLAN ANNOTATIONS =======================
 dimensions([0, 0.95, 5.55, 8.15, 10.65, 12.5], True, -0.5)
@@ -241,13 +271,13 @@ dimensions([0, 0.3, 7.7, 8.0], False, -0.6)
 dimensions([0, 8.0], False, -1.0)
 dimensions([0, 0.3, 3.55, 3.65, 4.75, 4.85, 7.7, 8.0], False, 13.1)
 for t, x, y in [
-    ("D 90x210 armored - opening 105x220", 7.275, 8.25), ("D 90x210 sliding", 5.70, 4.20),
+    ("D 90x210 armored - opening 105x220", 7.275, 8.25), ("D 90x210 sliding, frosted glass", 5.70, 4.20),
     ("D 80x210 - opening 90x215", 7.40, 2.55), ("D 80x210", 8.65, 4.56), ("D 70x210 sliding", 10.85, 4.42),
-    ("UC", 11.975, 4.20), ("W 180x100 sill h120 - 2 leaves", 2.30, 8.25), ("W 60x60 h160", 9.85, 8.25),
+    ("UC", 11.975, 4.20), ("W 180x100 sill h120 - tilt-and-turn", 2.30, 8.25), ("W 60x60 h160", 9.85, 8.25),
     ("FW 450x240 sliding", 3.25, -0.25), ("FW 240x240 sliding", 9.40, -0.25),
 ]:
     label(t, x, y)
 note("Wall openings enlarged by 5 cm per side for subframes/jambs (7.5 cm armored door)  -  "
      "D = door, W = window, FW = French window, UC = utility cupboard  -  4.60 m opening: lintel to be sized by a structural engineer")
 
-verify()
+verify(write_report=PARAMS.get("report", True), quiet=PARAMS.get("quiet", False))

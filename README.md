@@ -29,6 +29,10 @@ licensed professionals. Every project's report explicitly lists what could not b
   | Brief constraints | e.g. TV not next to a window on the same wall |
   | Ergonomics | seat height matching the surface |
   | Assembly | tall wardrobes can be tilted up in the room |
+  | Safety | no electrical item in the splash zone of an open shower or bath side |
+  | Privacy | shared rooms reachable without crossing bedrooms; WC and bed not visible from the entrance |
+  | Robustness | no measure at zero margin: everything survives a 2 cm placement tolerance per element |
+  | Requirements | every brief requirement (R01...) traced to the checks that prove it |
   | Geometry | no object intersecting another or a wall |
 
 - **Delivery**: 2D plan DWG with dimensions, layers and areas; 3D DWG that also opens in AutoCAD LT and Mac; STEP solids;
@@ -83,10 +87,12 @@ licensed professionals. Every project's report explicitly lists what could not b
 
 | Skill | When |
 |---|---|
-| `project-onboarding` | new project: initial questions, brief, survey of the starting plan |
+| `project-onboarding` | new project: initial questions, brief with requirement ids, survey, baseline review |
 | `furnishing` | lay out and furnish, until the checks are at zero |
 | `review-layout` | judge a plan, a DWG, a photo or a sketch, without changing anything |
 | `export-autocad` | produce 2D/3D DWG, STEP and report |
+| `pre-mortem` | a fresh reviewer imagines six months of living there and lists what fails |
+| `prompt-evals` | measure engine and prompts on fixtures with planted defects, before and after a change |
 
 Skills also trigger on their own when the request matches ("start from this plan", "what do you think?",
 "send me the DWGs").
@@ -111,6 +117,18 @@ brief.md ──> project.py ──(MCP execute_code)──> FreeCAD: 3D model
 - `lib/interiors.py` is the shared engine: primitives, doors, windows, sliding doors, use registration
   (`chair`, `access_zone`, `destination`, `clearance`, `tv`, ...), checks and export.
 - Thresholds live in `docs/design-rules.md` (minimum / comfort / source) and in the engine's `RULES` dictionary.
+
+### Techniques borrowed from engineering
+
+| Technique | Origin | Here |
+|---|---|---|
+| Regression tests | software | `evals/`: fixtures with planted defects; engine recall and blind-review recall, logged in `evals/history.md` |
+| Requirements traceability | systems engineering (V-model) | `requirement()` links every brief item to its checks; unlinked or failed items show in the report |
+| Independent review / pre-mortem | code review, project management | `pre-mortem` skill: a fresh reviewer sees only brief, plan and report |
+| Tolerance analysis | mechanical engineering | Robustness check: margins below 2 x 2 cm placement tolerance are flagged |
+| Pattern language | architecture (C. Alexander) | `docs/patterns.md`: named patterns used as leading words in design and review |
+| FMEA | manufacturing | `docs/fmea.md`: failure modes ranked by severity x occurrence x detection; drives new checks |
+| Design-space exploration | optimisation | `tools/explore.py`: runs the project over a parameter grid and ranks the variants |
 
 ### Manual commands
 
@@ -143,12 +161,15 @@ AGENTS.md                  instructions for the agent
 CLAUDE.md / GEMINI.md      point to AGENTS.md (Claude Code, Gemini CLI)
 README.md                  this file
 lib/interiors.py           engine: model, checks, export
-tools/                     read_plan.py, export.sh, annotate_plan.py, export_3d_dwg.py
+tools/                     read_plan.py, explore.py, export.sh, annotate_plan.py, export_3d_dwg.py
 docs/
   method.md                priorities, phases, per-room checks, scenarios, antipatterns, delivery format
   design-rules.md          thresholds
   brief-template.md        brief to fill in
   lessons.md               lessons learned (L01, L02, ...)
+  patterns.md              pattern language (P01, P02, ...)
+  fmea.md                  failure modes ranked by risk
+evals/                     fixtures with planted defects, engine eval, review scoring, history
 projects/
   _template/project.py     skeleton for a new project
   apartment-100sqm/        complete example
@@ -156,7 +177,7 @@ projects/
     input/                 client files            (excluded from git)
     output/                generated files         (excluded from git)
 archive/                   previous (Italian) versions, read-only
-.agents/skills/            project-onboarding, furnishing, review-layout, export-autocad (Agent Skills standard)
+.agents/skills/            project-onboarding, furnishing, review-layout, export-autocad, pre-mortem, prompt-evals
 .claude/skills             link to .agents/skills (Claude Code)
 ```
 

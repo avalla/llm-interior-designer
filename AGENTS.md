@@ -20,11 +20,14 @@ Reusable base for designing and checking furnishing layouts (apartments, villas,
 | `projects/<name>/output/` | FCStd, 2D/3D DWG, STEP, PNG, `verification_report.md`: generated, excluded from git |
 | `projects/_template/project.py` | skeleton for a new project |
 | `projects/apartment-100sqm/` | complete example to copy patterns from |
-| `tools/` | `read_plan.py` (incoming DWG/DXF), `export.sh`, `annotate_plan.py`, `export_3d_dwg.py` |
+| `tools/` | `read_plan.py` (incoming DWG/DXF), `explore.py` (variants), `export.sh`, `annotate_plan.py`, `export_3d_dwg.py` |
 | `docs/method.md` | the method: priorities, phases, per-room checks, scenarios, antipatterns, delivery format |
 | `docs/design-rules.md` | single source of thresholds (minimum / comfort / source) |
 | `docs/brief-template.md` | brief to fill in during onboarding |
 | `docs/lessons.md` | lessons learned `Lnn`, to reread before designing and to extend afterwards |
+| `docs/patterns.md` | pattern language `Pnn` (Alexander + project patterns), used as leading words |
+| `docs/fmea.md` | failure modes with severity/occurrence/detection: what to check first, what to automate next |
+| `evals/` | fixtures with planted defects, engine eval and review scoring (`prompt-evals` skill) |
 | `archive/` | previous (Italian) versions, read-only |
 
 ## Commands
@@ -34,6 +37,9 @@ Reusable base for designing and checking furnishing layouts (apartments, villas,
   Prints the NON-COMPLIANT items and ends with `TOTAL PROBLEMS: N`; details go to `output/verification_report.md`.
 - Export: `import interiors; interiors.export()` in FreeCAD, then `tools/export.sh projects/<name>`, which ends with `round-trip OK`.
 - Starting plan: `uv run --with ezdxf python tools/read_plan.py <file.dwg|dxf>`.
+- Variants: set `PROJECT` and `GRID`, then `exec(open(".../tools/explore.py").read(), {"PROJECT": PROJECT, "GRID": GRID})`
+  in FreeCAD; ranking in `output/variants.md`.
+- Engine eval: `exec(open(".../evals/run_engine.py").read(), {})` in FreeCAD; review scoring: `python3 evals/score_review.py <case>`.
 
 ## Conventions
 
@@ -44,12 +50,18 @@ Reusable base for designing and checking furnishing layouts (apartments, villas,
   `height_match`): without registration the checks cannot see it. Parts of the same piece share `item=`.
 - Plan texts (dimensions, labels) live in the project; room areas and sliding-door symbols are computed.
 - Technical objects excluded from the plan by name use unambiguous prefixes (`Slab`, `Tiles_`, `_Track`) (L12).
+- Every brief requirement has an id (`R01`...) and a `requirement()` linked to the checks that prove it, or `manual=True`.
+- Bedrooms are `private_room()`; WC and beds get a `no_view()` from the entrance.
+- Values worth comparing (table, sofa, bed positions) are read from `PARAMS`, so `tools/explore.py` can vary them.
+- Changes to skills, docs or checks are followed by the `prompt-evals` skill: no recall may drop (`evals/history.md`).
 - A new check goes into `lib/interiors.py`, with its threshold in `RULES` and in `docs/design-rules.md`, and is proven with a
   counter-test (lesson L04).
 
 ## Skills (`.agents/skills/`, Agent Skills standard; `.claude/skills` links to the same folder)
 
-- `project-onboarding`: start a new project, from the initial questions to the survey in the model.
+- `project-onboarding`: start a new project, from the initial questions to the survey and the baseline review.
 - `furnishing`: lay out and furnish in phases until the checks are at zero.
 - `review-layout`: judge a plan (model, DWG, photo, sketch, reported issues) with measures and statuses, without changing it.
 - `export-autocad`: deliver 2D/3D DWG, STEP and report.
+- `pre-mortem`: independent adversarial review by a fresh reviewer, before delivery.
+- `prompt-evals`: measure engine and review prompts on the eval fixtures, before and after a change.

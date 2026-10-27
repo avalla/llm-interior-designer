@@ -30,6 +30,7 @@ RULES = dict(
     seat_height=(0.25, 0.32),                 # surface - seat height difference
     assembly_margin=0.02,                     # tilt-up diagonal < room height - margin
     tol=1000.0,                               # 1 cm3: below this it is contact, not overlap
+    placement=0.02,                           # placement tolerance per element (survey + installation)
 )
 
 COL = dict(
@@ -71,6 +72,7 @@ def new_project(name, folder, interior, height=2.70):
     ST.ACCESS, ST.CLEAR, ST.TARGETS, ST.ROUTES = [], [], {}, []
     ST.START, ST.ROOMS, ST.WINDOWS, ST.TV, ST.HEIGHTS = None, [], [], [], []
     ST.NOTVERIF = list(NOT_VERIFIABLE)
+    ST.REQS, ST.PRIVATE, ST.VIEWS, ST.ELEC, ST.WET = [], [], [], [], []
     ST.ANN = dict(dims=[], labels=[], note="")
     ST.results = []
     return ST.doc
@@ -144,8 +146,8 @@ def jambs(name, x0, y0, x1, y1, z1, fr):
 
 
 def hinged(name, hx, hy, d, n, w, kind="Door", color=None, hgt=2.10, z0=0.0, leaf=True,
-           frame=None, handle=True):
-    """Hinged leaf. Hinge (hx, hy) on the wall face of the opening side; d = closed-leaf direction,
+           frame=None, handle=True, own=None):
+    """Hinged leaf. own = item the leaf belongs to (wardrobe body), ignored by the robustness margin. Hinge (hx, hy) on the wall face of the opening side; d = closed-leaf direction,
     n = opening direction. Generates the leaf open at 90 degrees, the swept volume, handle and reveal checks."""
     frame = RULES["frame"] if frame is None else frame
     leaf_shape = rel_box(hx, hy, d, n, (-0.04, 0), (0, w), z0 + 0.01, hgt)
@@ -167,7 +169,7 @@ def hinged(name, hx, hy, d, n, w, kind="Door", color=None, hgt=2.10, z0=0.0, lea
         m_ = RULES["handle"]
         hnd = rel_box(hx, hy, d, n, (-0.04 - m_, -0.04), (w - 0.12, w - 0.04), 0.95, 1.10)
         probe = rel_box(hx, hy, d, n, (-frame - RULES["reveal"] + 0.005, -frame), (0.005, 0.10), 0.10, 2.0)
-    ST.DOORS.append(dict(name=name, sweep=sweep, mark=m, kind=kind, handle=hnd, probe=probe,
+    ST.DOORS.append(dict(name=name, sweep=sweep, mark=m, kind=kind, handle=hnd, probe=probe, own=own,
                          leaf=leaf_shape if (leaf and z0 < 0.5) else None))
 
 
@@ -230,9 +232,10 @@ def chair(name, cx, cy, bx, by, g, surface_item, edge):
     seat(name, (name, surface_item), (tx + bx * edge, ty + by * edge), (bx, by), 0.21)
 
 
-def access_zone(label, x0, y0, x1, y1, own):
-    """Volume that must stay clear in front of wardrobes/cabinets (depth >= RULES['access'])."""
-    ST.ACCESS.append((label, B(x0, y0, 0.05, x1, y1, 1.80), tuple(own), min(x1 - x0, y1 - y0)))
+def access_zone(label, x0, y0, x1, y1, own, depth=None):
+    """Volume that must stay clear in front of wardrobes/cabinets/appliances (depth >= RULES['access']).
+    depth defaults to the shorter side; give it explicitly when the zone is narrower than deep (e.g. a 60 cm fridge)."""
+    ST.ACCESS.append((label, B(x0, y0, 0.05, x1, y1, 1.80), tuple(own), depth or min(x1 - x0, y1 - y0)))
 
 
 def clearance(label, a, b, minimum, comfort=None):
@@ -268,6 +271,33 @@ def tv(name):
 
 def height_match(label, z_surface, z_seat):
     ST.HEIGHTS.append((label, z_surface, z_seat))
+
+
+def requirement(rid, text, verified_by=(), satisfied_by=(), manual=False):
+    """Brief requirement (id as in brief.md). verified_by = patterns "Category/Element" matched against the results
+    (fnmatch, e.g. "Openings/Door_Bath*"); satisfied_by = objects that implement it; manual = judged in review only."""
+    ST.REQS.append(dict(id=rid, text=text, verified_by=tuple(verified_by), satisfied_by=tuple(satisfied_by),
+                        manual=manual))
+
+
+def private_room(name):
+    """Room that must not be crossed to reach shared destinations (e.g. a bedroom)."""
+    ST.PRIVATE.append(name)
+
+
+def no_view(lbl, eye_xy, target, eye_z=1.60):
+    """Sightline that must be blocked by walls (e.g. WC not visible from the entrance with doors open)."""
+    ST.VIEWS.append((lbl, eye_xy, eye_z, target))
+
+
+def electrical(*items):
+    """Items with power or water supply that must stay out of wet zones (washing machine, dryer, sockets, heaters)."""
+    ST.ELEC.extend(items)
+
+
+def wet_zone(label, x0, y0, x1, y1, z1=1.20):
+    """Splash zone next to an open side of a shower or bath (typically 60 cm): no electrical item may enter it."""
+    ST.WET.append((label, B(x0, y0, 0.0, x1, y1, z1)))
 
 
 def not_verifiable(category, reason):
@@ -398,7 +428,7 @@ def _bfs(g, nx, ny, start):
     return dist
 
 
-def verify(write_report=True):
+def verify(write_report=True, quiet=False):
     """Run every check, print the summary and write output/verification_report.md.
     Returns the number of NON-COMPLIANT blocking + significant results."""
     ST.results = []
@@ -472,8 +502,9 @@ def verify(write_report=True):
     rects = _obstacle_rects()
     g, nx, ny = _grid(rects, R["person_radius"])
     method = "5 cm grid, obstacles inflated by 30 cm"
+    dist_start = _bfs(g, nx, ny, ST.START) if ST.START else None
     if ST.START:
-        dist = _bfs(g, nx, ny, ST.START)
+        dist = dist_start
         for lbl, (x, y) in ST.TARGETS.items():
             c = _cell(x, y, nx, ny)
             k = c[1] * nx + c[0] if c else None
@@ -561,6 +592,63 @@ def verify(write_report=True):
            VERIFIED if ok else NC, "" if ok else "significant", "hypotenuse of height x depth",
            "" if ok else "assemble in place or in modules")
 
+    # 10a) wet zones: no electrical item next to an open shower side
+    for lbl, zone in ST.WET:
+        h = [l for it, l, sh, _g in ST.CHECK if it in ST.ELEC and zone.BoundBox.intersect(sh.BoundBox)
+             and zone.common(sh).Volume > R["tol"]]
+        _r("Safety", lbl, ("electrical items inside: " + ", ".join(h)) if h else "no electrical item",
+           "no electrical item in the splash zone", NC if h else VERIFIED, "blocking" if h else "",
+           "3D intersection of the splash zone with items declared electrical()")
+
+    # 10b) privacy: shared destinations reachable without crossing private rooms
+    if ST.START and ST.PRIVATE:
+        priv = [rc for r in ST.ROOMS if r["name"] in ST.PRIVATE for rc in r["rects"]]
+        gp, _, _ = _grid(rects + priv, R["person_radius"])
+        dist_p = _bfs(gp, nx, ny, ST.START)
+        for lbl, (x, y) in ST.TARGETS.items():
+            if _room_of(x, y) in ST.PRIVATE:
+                continue
+            c = _cell(x, y, nx, ny)
+            k = c[1] * nx + c[0]
+            if dist_start[k] < 0:
+                continue          # unreachable at all: already a Routes failure
+            ok = dist_p[k] >= 0
+            _r("Privacy", lbl, "reachable without crossing %s" % ", ".join(ST.PRIVATE) if ok else
+               "reachable only through " + ", ".join(ST.PRIVATE), "shared zones never through a private room",
+               VERIFIED if ok else NC, "" if ok else "significant", "route search with private rooms blocked")
+
+    # 10c) sightlines that walls must block (doors assumed open)
+    for lbl, (ex, ey), ez, target in ST.VIEWS:
+        bb = ST.doc.getObject(target).Shape.BoundBox
+        seg = Part.LineSegment(V(ex * S, ey * S, ez * S), bb.Center).toShape()
+        blocked = [w for w, ws in ST.WALLS if ws.BoundBox.intersect(seg.BoundBox) and ws.distToShape(seg)[0] < 1.0]
+        _r("Privacy", lbl, ("blocked by " + blocked[0]) if blocked else "visible", "not visible with doors open",
+           VERIFIED if blocked else NC, "" if blocked else "significant", "3D sightline eye -> object centre vs walls")
+
+    # 10d) robustness: margins smaller than the placement tolerance of two elements make the solution fragile
+    tol2 = 2 * R["placement"]
+    fragile = []
+    for x in ST.results:
+        if x["cat"] in ("Seats", "Clearances") and x["status"] == VERIFIED:
+            meas = float(x["measure"].split()[0]) / 100
+            mn = float(x["threshold"].split()[1]) / 100
+            if meas - mn < tol2 - 1e-6:
+                fragile.append((x["cat"] + "/" + x["elem"], meas - mn))
+    for dd in ST.DOORS:
+        zone = App.BoundBox(dd["sweep"].BoundBox)
+        zone.enlarge(tol2 * S)
+        near = min([dd["sweep"].distToShape(sh)[0] / S for it, _l, sh, _g in ST.CHECK
+                    if it != dd["own"] and zone.intersect(sh.BoundBox)] or [9])
+        if near < tol2 and not hits_of(dd["sweep"], walls=False):
+            fragile.append(("Openings/" + dd["name"], near))
+    for elem, m in fragile:
+        _r("Robustness", elem, "margin %.0f cm" % (m * 100), ">= %.0f cm (2 x placement tolerance)" % (tol2 * 100),
+           NC, "significant", "measure - minimum, or swept leaf - nearest object",
+           "works only with near-zero tolerance: widen it")
+    if not fragile:
+        _r("Robustness", "Seats, clearances, door swings", "all margins >= %.0f cm" % (tol2 * 100),
+           "no fragile measure", VERIFIED, "", "measure - minimum")
+
     # 11) interpenetrations
     pairs = []
     C_ = ST.CHECK
@@ -576,6 +664,29 @@ def verify(write_report=True):
     _r("Geometry", "Furniture/wall interpenetrations", ", ".join(pairs) if pairs else "none", "none",
        NC if pairs else VERIFIED, "blocking" if pairs else "", "pairwise 3D intersection")
 
+    # 12) requirements traceability (brief -> design -> checks)
+    import fnmatch
+    for rq in ST.REQS:
+        missing = [o for o in rq["satisfied_by"] if ST.doc.getObject(o) is None]
+        linked = [x for x in ST.results if any(fnmatch.fnmatch("%s/%s" % (x["cat"], x["elem"]), p)
+                                               for p in rq["verified_by"])]
+        failed = [x for x in linked if x["status"] == NC]
+        elem = "%s %s" % (rq["id"], rq["text"])
+        if missing:
+            _r("Requirements", elem, "missing objects: " + ", ".join(missing), "implemented", NC, "blocking", "object lookup")
+        elif failed:
+            _r("Requirements", elem, "%d/%d linked checks failed" % (len(failed), len(linked)), "all linked checks pass",
+               NC, min((x["sev"] for x in failed), key=SEVERITY.index), "traceability",
+               ", ".join("%s/%s" % (x["cat"], x["elem"]) for x in failed))
+        elif rq["manual"]:
+            _r("Requirements", elem, "judged in review", "-", NOT_VERIF, "", "manual: review-layout / pre-mortem")
+        elif not linked:
+            _r("Requirements", elem, "no linked check", ">= 1 automatic check", NC, "significant", "traceability",
+               "add a check or mark the requirement manual")
+        else:
+            _r("Requirements", elem, "%d linked checks passed" % len(linked), "all linked checks pass", VERIFIED, "",
+               "traceability")
+
     for cat, reason in ST.NOTVERIF:
         _r("Not verifiable", cat, "-", "-", NOT_VERIF, "significant", "-", reason)
 
@@ -583,13 +694,16 @@ def verify(write_report=True):
     problems = [x for x in ST.results if x["status"] == NC and x["sev"] in ("blocking", "significant")]
     improve = [x for x in ST.results if x["sev"] == "improvement"]
     cnt = collections.Counter(x["status"] for x in ST.results)
+    path = _report() if write_report else None
+    if quiet:
+        return len(problems)
     print("=== VERIFICATION %s: %s ===" % (ST.name, ", ".join("%s %d" % kv for kv in sorted(cnt.items()))))
     for x in problems:
         print("NON-COMPLIANT [%s] %s / %s: %s (threshold %s)" % (x["sev"], x["cat"], x["elem"], x["measure"], x["threshold"]))
     for x in improve:
         print("improvement   %s / %s: %s (%s)" % (x["cat"], x["elem"], x["measure"], x["note"] or x["threshold"]))
-    if write_report:
-        print("report:", _report())
+    if path:
+        print("report:", path)
     print("TOTAL PROBLEMS:", len(problems))
     return len(problems)
 
@@ -612,6 +726,10 @@ def _report():
           "|---|---|---|---|---|---|---|---|"]
     for x in rs:
         L.append("| %(cat)s | %(elem)s | %(measure)s | %(threshold)s | %(status)s | %(sev)s | %(method)s | %(note)s |" % x)
+    L += ["", "## Requirements traceability", "", "| Requirement | Result | Status | Severity | Note |", "|---|---|---|---|---|"]
+    for x in rs:
+        if x["cat"] == "Requirements":
+            L.append("| %(elem)s | %(measure)s | %(status)s | %(sev)s | %(note)s |" % x)
     L += ["", "## Rooms", "", "| Room | Net area | Habitable |", "|---|---|---|"]
     for r in ST.ROOMS:
         L.append("| %s | %.1f m2 | %s |" % (r["name"], r["area"], "yes" if r["habitable"] else "no"))

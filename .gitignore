@@ -1,5 +1,7 @@
 # --- generated files ---
 projects/*/output/
+evals/fixtures/*/output/
+evals/results/
 build/
 # loose CAD exports (e.g. archive/)
 *.FCStd

@@ -1,12 +1,13 @@
 ---
 name: project-onboarding
-description: Starts a new furnishing or interior layout project: collects starting files, type of work, occupants, furnishing style and constraints, fills in the brief and surveys the plan into the model. Use for "new project", "start from this plan", "furnish this home".
+description: Starts a new furnishing or interior layout project: collects starting files, type of work, occupants, furnishing style and constraints, fills in the brief with traceable requirements, surveys the plan into the model and reviews the starting state. Use for "new project", "start from this plan", "furnish this home".
 ---
 
 # Project onboarding
 
-Goal: a `projects/<name>/` with a filled-in `brief.md` and a `project.py` at **PHASE = 1** (envelope surveyed), ready for the
-`furnishing` skill. Reference method: [`docs/method.md`](../../../docs/method.md), sections 1-2.
+Goal: a `projects/<name>/` with a filled-in `brief.md` (requirements with ids), a `project.py` at **PHASE = 1** (envelope
+surveyed, requirements registered) and a baseline review, ready for the `furnishing` skill.
+Reference method: [`docs/method.md`](../../../docs/method.md), sections 1-2.
 
 ## Steps
 
@@ -36,13 +37,22 @@ Goal: a `projects/<name>/` with a filled-in `brief.md` and a `project.py` at **P
    Done when every row of [`docs/brief-template.md`](../../../docs/brief-template.md) has a value, a confirmed default
    or "to confirm".
 
-4. **Project folder.** Create `projects/<short-name>/`, copy `projects/_template/project.py` and `docs/brief-template.md`
-   as `brief.md`, fill in the brief with sources and the assumption log (impact of each wrong assumption).
+4. **Project folder and requirements.** Create `projects/<short-name>/`, copy `projects/_template/project.py` and
+   `docs/brief-template.md` as `brief.md`. Fill in the brief with sources and the assumption log, and turn every
+   programme item, constraint and forbidden element into a requirement with a stable id (`R01`, `R02`, ...).
+   Done when every requirement has an id, a priority and a source.
 
-5. **Survey (PHASE 1).** In `project.py`: `new_project()` with `interior` and height, then windows, doors, walls, rooms and
-   `entrance()` from the source. Run it in FreeCAD, look at the top screenshot and compare: every source dimension matches
-   the model (same extents, same openings). Differences go into the assumption log. Done when `verify()` runs and the
-   dimensions match.
+5. **Survey (PHASE 1).** In `project.py`: `new_project()` with `interior` and height, then windows, doors, walls, rooms,
+   `entrance()`, `private_room()` for bedrooms, `no_view()` from the entrance towards WC and beds, furniture to keep, and one
+   `requirement()` per brief requirement, linked to the checks that prove it (or `manual=True`). Run it in FreeCAD, look
+   at the top screenshot and compare: every source dimension matches the model (same extents, same openings).
+   Differences go into the assumption log. Done when `verify()` runs and the dimensions match.
 
-6. **Hand-over.** Summarise for the user: what is measured and what is assumed, the open questions that still block, and
-   the proposed next step (`furnishing` skill, possibly with 2-3 layout options).
+6. **Baseline review.** Run the `review-layout` skill on the surveyed starting state (envelope, fixed services, furniture
+   to keep), before any design. Look for constraints the brief did not mention: dark rooms, doors that clash, services in
+   the way, kept furniture that does not fit, requirements already impossible in this envelope. Every finding goes into
+   the brief: as a new requirement, an open point in the assumption log, or a question for the user.
+   Done when every baseline finding is filed in the brief.
+
+7. **Hand-over.** Summarise for the user: what is measured and what is assumed, the baseline findings, the open questions
+   that still block, and the proposed next step (`furnishing` skill, possibly with 2-3 layout options).

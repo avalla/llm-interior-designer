@@ -43,3 +43,33 @@ full threshold, not at the limit. Applied: `furnishing` skill.
 Rule: technical objects excluded by name use an unambiguous prefix (`Slab`, `Tiles_`, `_Track`); after a rename, compare
 the plan entity counts with the previous export. Applied: `interiors.export()`.
 
+**L13 - Broken links are silent.** Requirements R03/R04 pointed to object names that did not exist (`Door_Entrance` instead of
+`Door_Entrance_Leaf`): without a check, the trace would have looked complete. Rule: every `requirement()` link is resolved
+at verification time; a missing object is blocking. Applied: Requirements check.
+
+**L14 - Measure against others, not yourself.** The robustness margin of a wardrobe leaf was 0 cm from its own wardrobe body.
+Rule: a leaf declares its owner (`hinged(..., own=item)`) and margins ignore it. Applied: Robustness check.
+
+**L15 - An open leaf is furniture.** In an eval fixture the entrance leaf, open at 90 degrees, parked in the middle of the room
+and cut the only passage. Rule: hinge on the side of the nearest wall so the leaf rests against it (P16); routes treat open
+leaves as obstacles. Applied: Routes check, pattern P16.
+
+**L16 - Fixtures fail only for planted defects.** The first eval fixtures failed for unplanned reasons (cramped table and
+island, wrong target point), which hid one planted defect. Rule: an eval run must show an empty "Unexpected NON-COMPLIANT"
+table before its recall means anything. Applied: `evals/run_engine.py`, skill `prompt-evals`.
+
+**L17 - Unmodelled is unchecked.** The fridge door, the oven and the dishwasher were not in the model, so R02 ("doors open
+without hitting anything") passed while the kitchen could not be used with an appliance open (pre-mortem S07, S08).
+Rule: every appliance with a door gets a `hinged()` leaf or an `access_zone()` with the person in front.
+Applied: `furnishing` skill step 2, example project.
+
+**L18 - Water and power.** A shower with an open side stood 20 cm from the washing machine: no collision, a safety
+violation (pre-mortem S20, the only blocking story). Rule: declare `electrical()` items and a `wet_zone()` on every open
+side of a shower or bath. Applied: Safety check, counter-test on the old layout.
+
+**L19 - The designer's review is not enough.** After `verify()` at zero and three user reviews, a fresh reviewer still
+found 1 blocking and 14 significant stories (pre-mortem 2026-10-27). Rule: the `pre-mortem` skill is mandatory before
+delivery, and its founded stories feed lessons, FMEA and checks. Applied: `furnishing` skill step 7.
+
+**L20 - Say what "depth" means.** A 60 cm wide fridge zone was read as 60 cm deep (shorter side). Rule: `access_zone(...,
+depth=)` when the zone is narrower than it is deep. Applied: `access_zone()`.

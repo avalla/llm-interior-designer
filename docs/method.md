@@ -49,15 +49,19 @@ a closed phase reopens it.
 
 | Phase | Content | Done when |
 |---|---|---|
-| 0. Brief | `brief.md` filled in, assumption log | every blocking item has a value or a declared assumption |
+| 0. Brief | `brief.md` filled in, requirements with ids (`R01`...), assumption log, baseline review | every blocking item has a value or a declared assumption |
 | 1. Survey | walls, openings, fixed services, rooms, entrance | model dimensions match the source |
-| 2. Layout | relationships between rooms; 2-3 options when the problem warrants it, discarding those that break constraints | choice justified |
+| 2. Layout | relationships between rooms; 2-3 options when the problem warrants it, discarding those that break constraints; `tools/explore.py` for placements worth comparing | choice justified |
 | 3. Main furniture | beds, sofas, tables, kitchen, wardrobes, fixtures, with their uses registered | checks at zero |
 | 4. Details | rugs, lamps, plants, wall items | checks at zero, nothing from phase 3 moved |
-| 5. Review | top and isometric screenshots, scenarios, antipatterns | every room walked through the scenarios |
+| 5. Review | top and isometric screenshots, scenarios, antipatterns, patterns (`patterns.md`); then a `pre-mortem` by a fresh reviewer | every pre-mortem story has a verdict |
 | 6. Delivery | export, report, furniture schedule | `round-trip OK` and no blocking items in the report |
 
 After every change, recheck what is connected: moving a wardrobe can fix one collision and create another.
+
+Quality controls borrowed from engineering run alongside the phases: requirements traceability (`requirement()`),
+tolerance analysis (Robustness), failure modes ranked in [`fmea.md`](fmea.md), named patterns in
+[`patterns.md`](patterns.md), an independent pre-mortem, and regression evals of the prompts themselves (`evals/`).
 
 ## 5. Layout
 

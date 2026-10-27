@@ -1,0 +1,103 @@
+{
+  "description": "Defects that verify() does NOT measure: only a review (review-layout, pre-mortem) can find them. Measures prompt quality.",
+  "defects": [
+    {
+      "id": "B1",
+      "text": "Sofa turns its back to the TV",
+      "engine": [],
+      "keywords": [
+        [
+          "sofa"
+        ],
+        [
+          "tv",
+          "television"
+        ],
+        [
+          "back",
+          "facing",
+          "faces",
+          "away",
+          "orient*",
+          "behind"
+        ]
+      ]
+    },
+    {
+      "id": "B2",
+      "text": "Bed headboard under the bedroom window",
+      "engine": [],
+      "keywords": [
+        [
+          "bed",
+          "headboard"
+        ],
+        [
+          "window"
+        ],
+        [
+          "under*",
+          "below",
+          "beneath",
+          "against"
+        ]
+      ]
+    },
+    {
+      "id": "B3",
+      "text": "Wardrobe in front of the living window blocks daylight and the window",
+      "engine": [],
+      "keywords": [
+        [
+          "wardrobe"
+        ],
+        [
+          "window",
+          "light",
+          "daylight"
+        ]
+      ]
+    },
+    {
+      "id": "B4",
+      "text": "No dining table: nowhere to eat in the flat",
+      "engine": [],
+      "keywords": [
+        [
+          "table",
+          "dining",
+          "eat",
+          "meal*"
+        ],
+        [
+          "missing",
+          "no",
+          "absent",
+          "without",
+          "lack*"
+        ]
+      ]
+    },
+    {
+      "id": "B5",
+      "text": "Bed visible from the entrance through the bedroom door",
+      "engine": [],
+      "keywords": [
+        [
+          "bed"
+        ],
+        [
+          "entrance",
+          "front door"
+        ],
+        [
+          "visible",
+          "view*",
+          "sight*",
+          "seen",
+          "see*"
+        ]
+      ]
+    }
+  ]
+}

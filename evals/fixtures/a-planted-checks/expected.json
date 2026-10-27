@@ -1,0 +1,173 @@
+{
+  "description": "Defects that verify() must report (engine regression) and that a review should also mention.",
+  "defects": [
+    {
+      "id": "A1",
+      "text": "Entrance door swing hits the shoe cabinet",
+      "engine": [
+        "Openings/Door_Entrance"
+      ],
+      "keywords": [
+        [
+          "entrance"
+        ],
+        [
+          "shoe*",
+          "cabinet"
+        ]
+      ]
+    },
+    {
+      "id": "A2",
+      "text": "Dining table too close to the wall: no room to stand up from the west chair",
+      "engine": [
+        "Seats/Chair_1"
+      ],
+      "keywords": [
+        [
+          "chair*",
+          "table",
+          "dining"
+        ],
+        [
+          "wall",
+          "stand*",
+          "behind",
+          "space"
+        ]
+      ]
+    },
+    {
+      "id": "A3",
+      "text": "TV right next to the living window on the same wall",
+      "engine": [
+        "Brief constraints/TV TV_A"
+      ],
+      "keywords": [
+        [
+          "tv"
+        ],
+        [
+          "window"
+        ]
+      ]
+    },
+    {
+      "id": "A4",
+      "text": "Floor lamp closes the access to the sofa",
+      "engine": [
+        "Routes/Living: sofa"
+      ],
+      "keywords": [
+        [
+          "sofa"
+        ],
+        [
+          "lamp",
+          "unreachable",
+          "access*",
+          "reach*"
+        ]
+      ]
+    },
+    {
+      "id": "A5",
+      "text": "Kitchen window leaf hits the tap",
+      "engine": [
+        "Openings/Window_Kitchen_Leaf_L"
+      ],
+      "keywords": [
+        [
+          "window",
+          "leaf",
+          "sash"
+        ],
+        [
+          "tap",
+          "faucet"
+        ]
+      ]
+    },
+    {
+      "id": "A6",
+      "text": "Kitchen aisle exactly at the minimum: no tolerance",
+      "engine": [
+        "Robustness/Clearances/Kitchen aisle"
+      ],
+      "keywords": [
+        [
+          "aisle"
+        ],
+        [
+          "tolerance",
+          "margin",
+          "exactly",
+          "zero",
+          "minimum"
+        ]
+      ]
+    },
+    {
+      "id": "A7",
+      "text": "Bathroom reachable only through the bedroom",
+      "engine": [
+        "Privacy/Bathroom: WC"
+      ],
+      "keywords": [
+        [
+          "bathroom",
+          "wc",
+          "toilet"
+        ],
+        [
+          "bedroom"
+        ],
+        [
+          "through",
+          "private",
+          "privacy",
+          "cross*"
+        ]
+      ]
+    },
+    {
+      "id": "A8",
+      "text": "Bed blocks the space in front of the wardrobe",
+      "engine": [
+        "Access zones/Bedroom: wardrobe"
+      ],
+      "keywords": [
+        [
+          "wardrobe"
+        ],
+        [
+          "bed"
+        ],
+        [
+          "access*",
+          "front",
+          "in front"
+        ]
+      ]
+    },
+    {
+      "id": "A9",
+      "text": "Bedroom door hinged 5 cm from the wall: no jamb, handle hits the wall",
+      "engine": [
+        "Handles/Door_Bedroom",
+        "Reveals/Door_Bedroom"
+      ],
+      "keywords": [
+        [
+          "door_bedroom",
+          "bedroom door"
+        ],
+        [
+          "handle",
+          "reveal",
+          "jamb"
+        ]
+      ]
+    }
+  ]
+}

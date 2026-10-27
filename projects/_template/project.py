@@ -24,7 +24,9 @@ c = COL
 # opening("Door_X", x0, y0, x1, y1, rough_h, net_w, net_h); jambs(...); hinged(...) / sliding(...)
 # wall("Wall_X", x0, y0, x1, y1)
 # room("Room", [(x0, y0, x1, y1)], (label_x, label_y), habitable=True)
-# entrance(x, y)
+# entrance(x, y); private_room("Bedroom"); no_view("Entrance: WC not visible", (x, y), "WC")
+# requirement("R01", "text from brief.md", ("Category/Element pattern", ...), ("object", ...))  or manual=True
+PARAMS = globals().get("PARAMS", {})   # values varied by tools/explore.py, e.g. PARAMS.get("table_x", 5.0)
 
 if PHASE >= 2:
     # ======================= PHASE 2 - MAIN FURNITURE (beds, sofas, tables, kitchen, wardrobes) =======================
@@ -38,4 +40,4 @@ if PHASE >= 3:
 # ======================= PLAN ANNOTATIONS (before export) =======================
 # dimensions([...], True, y_line) / dimensions([...], False, x_line); label("D 80x210", x, y); note("...")
 
-verify()
+verify(write_report=PARAMS.get("report", True), quiet=PARAMS.get("quiet", False))
