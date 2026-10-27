@@ -1,6 +1,6 @@
-# Crea un DXF 3D (mesh polyface colorate, un layer per gruppo) leggibile da qualsiasi AutoCAD,
-# anche Mac e LT, che non importano STEP.
-# Uso: uv run --with ezdxf python esporta_3d_dwg.py mesh3d.json Appartamento_3D.dxf
+# Builds a 3D DXF (coloured polyface meshes, one layer per group) readable by any AutoCAD,
+# including Mac and LT, which cannot import STEP.
+# Usage: uv run --with ezdxf python export_3d_dwg.py mesh3d.json Apartment_3D.dxf
 import json, sys
 import ezdxf
 from ezdxf import colors
@@ -23,4 +23,4 @@ for obj in json.load(open(src)):
         pf.transparency = obj["tr"] / 100.0
 
 doc.saveas(dst)
-print("ok", dst, len(msp), "mesh,", len(doc.layers), "layer")
+print("ok", dst, len(msp), "meshes,", len(doc.layers), "layers")

@@ -1,18 +1,18 @@
-# --- file prodotti ---
-progetti/*/output/
+# --- generated files ---
+projects/*/output/
 build/
-# export CAD sparsi (es. archivio/)
+# loose CAD exports (e.g. archive/)
 *.FCStd
 *.FCBak
 *.dwg
 *.dxf
 *.step
 *.stp
-archivio/**/*.png
+archive/**/*.png
 
-# --- file in input (piante, PDF, foto, schede prodotto del cliente) ---
-progetti/*/input/
+# --- input files (client plans, PDFs, photos, product data sheets) ---
+projects/*/input/
 
-# --- cache e stato locale ---
+# --- caches and local state ---
 __pycache__/
 .omc/

@@ -1,174 +1,188 @@
-# Progettazione d'interni con FreeCAD e Claude Code
+# Interior design with FreeCAD and AI agents
 
-Base di lavoro per progettare **distribuzione interna e arredamento** di appartamenti e ville parlando con un agente
-(Claude Code), che costruisce il modello 3D in FreeCAD, lo **verifica** con regole di uso reale (porte che si aprono,
-spazio dietro le sedie, percorsi, luce naturale, montaggio degli armadi...) e consegna i file per **AutoCAD**.
+A working base for designing **interior layouts and furnishing** of apartments and villas by talking to an agent
+(Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode). The agent builds the 3D model in FreeCAD, **checks** it
+against real-use rules (doors that open, space behind chairs, routes, daylight, wardrobe assembly...) and delivers the
+files for **AutoCAD**.
 
-Il risultato e' sempre una **proposta preliminare**: strutture, impianti e conformita' normativa restano da verificare con
-professionisti abilitati. Il report di ogni progetto elenca esplicitamente cio' che non e' stato possibile verificare.
+The result is always a **preliminary proposal**: structure, building services and regulatory compliance must be checked by
+licensed professionals. Every project's report explicitly lists what could not be verified.
 
-## Cosa fa
+## What it does
 
-- **Onboarding**: raccoglie file di partenza (DWG/DXF/PDF/foto), tipo di intervento, abitanti, tipologia di arredamento,
-  vincoli; compila un brief con la fonte di ogni dato e il registro delle assunzioni.
-- **Modello**: muri, porte (con telai e spallette), finestre (con controtelai), scorrevoli, arredi, a fasi:
-  involucro -> arredi principali -> dettagli.
-- **Verifiche automatiche** su ogni esecuzione, con stato (VERIFICATO / NON CONFORME / NON VERIFICABILE / NON APPLICABILE)
-  e gravita' (bloccante / rilevante / migliorativa):
+- **Onboarding**: collects starting files (DWG/DXF/PDF/photos), type of work, occupants, furnishing style, constraints;
+  fills in a brief with the source of every item and an assumption log.
+- **Model**: walls, doors (with jambs and reveals), windows (with subframes), sliding doors, furniture, in phases:
+  envelope -> main furniture -> details.
+- **Automatic checks** on every run, each with a status (VERIFIED / NON-COMPLIANT / NOT VERIFIABLE / NOT APPLICABLE) and a
+  severity (blocking / significant / improvement):
 
-  | Verifica | Cosa controlla |
+  | Check | What it verifies |
   |---|---|
-  | Aperture | traiettoria completa di porte, ante di finestre e armadi, scorrevoli: nessun urto in 3D |
-  | Maniglie e spallette | maniglia libera con anta a 90 gradi, almeno 10 cm per lo stipite |
-  | Sedute | dal bordo del piano: 75 cm per alzarsi, 90 per passare dietro chi siede |
-  | Zone di prelievo | 70 cm liberi davanti ad armadi e vani |
-  | Passaggi | larghezze minime e di comfort tra coppie di elementi |
-  | Percorsi | ogni zona d'uso raggiungibile dall'ingresso con 60 cm continui (griglia 5 cm) |
-  | Luce e aria | finestre >= 1/8 del pavimento, aerazione dei bagni, affollamento del locale |
-  | Vincoli del brief | es. TV non accanto a una finestra sulla stessa parete |
-  | Ergonomia | altezza seduta coerente con il piano |
-  | Montaggio | armadi alti raddrizzabili nel locale |
-  | Geometria | nessun oggetto che si compenetra o entra nei muri |
+  | Openings | full trajectory of doors, window and wardrobe leaves, sliding doors: no 3D collision |
+  | Handles and reveals | handle clear with the leaf at 90 degrees, at least 10 cm for the jamb |
+  | Seats | from the surface edge: 75 cm to stand up, 90 to walk behind a seated person |
+  | Access zones | 70 cm clear in front of wardrobes and cabinets |
+  | Clearances | minimum and comfort widths between pairs of elements |
+  | Routes | every use zone reachable from the entrance with a continuous 60 cm (5 cm grid) |
+  | Light and air | windows >= 1/8 of the floor, bathroom ventilation, room crowding |
+  | Brief constraints | e.g. TV not next to a window on the same wall |
+  | Ergonomics | seat height matching the surface |
+  | Assembly | tall wardrobes can be tilted up in the room |
+  | Geometry | no object intersecting another or a wall |
 
-- **Consegna**: pianta DWG 2D con quote, layer e superfici; DWG 3D apribile anche da AutoCAD LT e Mac; STEP a solidi;
-  anteprima PNG; `report_verifiche.md` con verifiche, locali, luci dei fori e tabella arredi.
+- **Delivery**: 2D plan DWG with dimensions, layers and areas; 3D DWG that also opens in AutoCAD LT and Mac; STEP solids;
+  PNG preview; `verification_report.md` with checks, rooms, rough openings and furniture schedule.
 
-## Requisiti
+## Requirements
 
-| Componente | Versione / note |
+| Component | Version / notes |
 |---|---|
-| macOS | i percorsi del progetto sono per macOS |
-| [FreeCAD](https://www.freecad.org) | 1.1 (provato con 1.1.4) |
-| Addon **FreeCAD MCP** | da [neka-nat/freecad-mcp](https://github.com/neka-nat/freecad-mcp), cartella `addon/FreeCADMCP` |
-| [Claude Code](https://claude.com/claude-code) | con il server MCP `freecad` registrato |
-| [uv](https://docs.astral.sh/uv/) | esegue il server MCP (`uvx`) e gli script `ezdxf` |
-| [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter) | gratuito, in `/Applications`: conversione DWG <-> DXF |
+| macOS | project paths are for macOS |
+| [FreeCAD](https://www.freecad.org) | 1.1 (tested with 1.1.4) |
+| **FreeCAD MCP** addon | from [neka-nat/freecad-mcp](https://github.com/neka-nat/freecad-mcp), folder `addon/FreeCADMCP` |
+| An agent with MCP and Agent Skills support | Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode; with the `freecad` MCP server registered |
+| [uv](https://docs.astral.sh/uv/) | runs the MCP server (`uvx`) and the `ezdxf` scripts |
+| [ODA File Converter](https://www.opendesign.com/guestfiles/oda_file_converter) | free, in `/Applications`: DWG <-> DXF conversion |
 
-## Installazione
+## Installation
 
-1. **FreeCAD**: `brew install --cask freecad` (oppure dal sito).
-2. **Addon MCP** dentro FreeCAD:
+1. **FreeCAD**: `brew install --cask freecad` (or from the website).
+2. **MCP addon** inside FreeCAD:
    ```bash
    git clone --depth 1 https://github.com/neka-nat/freecad-mcp.git /tmp/freecad-mcp
    mkdir -p ~/Library/Application\ Support/FreeCAD/v1-1/Mod/
    cp -r /tmp/freecad-mcp/addon/FreeCADMCP ~/Library/Application\ Support/FreeCAD/v1-1/Mod/
    ```
-   Riavvia FreeCAD. Per aggiornare l'addon in futuro si ripete la copia con un clone recente.
-3. **Server MCP** in Claude Code (una volta sola, valido per tutti i progetti):
-   ```bash
-   claude mcp add --scope user freecad -- uvx freecad-mcp
-   ```
-4. **ODA File Converter**: scarica il `.dmg` per il tuo processore dalla pagina indicata sopra e trascina l'app in
-   `/Applications`. Serve per produrre e leggere i DWG.
-5. In FreeCAD (Preferenze, oppure dalla console Python) imposta il percorso del convertitore, se vuoi aprire/salvare DWG
-   anche dall'interfaccia di FreeCAD:
-   `/Applications/ODAFileConverter.app/Contents/MacOS/ODAFileConverter`.
+   Restart FreeCAD. To update the addon later, repeat the copy from a fresh clone.
+3. **MCP server** in the agent you use (once). The command is always `uvx freecad-mcp`:
+   - Claude Code: `claude mcp add --scope user freecad -- uvx freecad-mcp`
+   - Codex: in `~/.codex/config.toml`
+     ```toml
+     [mcp_servers.freecad]
+     command = "uvx"
+     args = ["freecad-mcp"]
+     ```
+   - Cursor (`.cursor/mcp.json`), Gemini CLI (`~/.gemini/settings.json`):
+     ```json
+     { "mcpServers": { "freecad": { "command": "uvx", "args": ["freecad-mcp"] } } }
+     ```
+   - Others (Copilot, OpenCode): the same command/arguments pair in their MCP configuration file.
+4. **ODA File Converter**: download the `.dmg` for your processor from the page above and drag the app into
+   `/Applications`. It is needed to produce and read DWG files.
+5. Optionally, set the converter path in FreeCAD (Preferences, or from the Python console) to open/save DWG from the
+   FreeCAD GUI too: `/Applications/ODAFileConverter.app/Contents/MacOS/ODAFileConverter`.
 
-## Avvio di una sessione
+## Starting a session
 
-1. Apri FreeCAD, scegli il workbench **MCP Addon** (menu *View -> Workbench*) e clicca **Start RPC Server**.
-   Nel Report view compare `RPC Server started at 127.0.0.1:9875`.
-2. Apri Claude Code **in questa cartella**: carica `CLAUDE.md` -> `AGENTS.md` e le skill di `.claude/skills/`.
-3. Chiedi cosa ti serve, oppure usa direttamente una skill:
+1. Open FreeCAD, choose the **MCP Addon** workbench (*View -> Workbench*) and click **Start RPC Server**.
+   The Report view shows `RPC Server started at 127.0.0.1:9875`.
+2. Open the agent **in this folder**. Instructions are in `AGENTS.md` (Claude Code reaches it through `CLAUDE.md`,
+   Gemini CLI through `GEMINI.md`); skills are in `.agents/skills/`, with `.claude/skills` as a link for Claude Code.
+3. Ask for what you need, or call a skill by name (`/name` in Claude Code, `$name` in Codex):
 
-| Skill | Quando |
+| Skill | When |
 |---|---|
-| `/onboarding-progetto` | nuovo progetto: domande iniziali, brief, rilievo della pianta di partenza |
-| `/arredamento` | distribuire e arredare, fino a verifiche a zero |
-| `/review-layout` | giudicare una pianta, un DWG, una foto o uno schizzo, senza modificare nulla |
-| `/export-autocad` | produrre DWG 2D/3D, STEP e report |
+| `project-onboarding` | new project: initial questions, brief, survey of the starting plan |
+| `furnishing` | lay out and furnish, until the checks are at zero |
+| `review-layout` | judge a plan, a DWG, a photo or a sketch, without changing anything |
+| `export-autocad` | produce 2D/3D DWG, STEP and report |
 
-Le skill si attivano anche da sole quando la richiesta corrisponde ("partiamo da questa pianta", "cosa ne pensi?",
-"passami i DWG").
+Skills also trigger on their own when the request matches ("start from this plan", "what do you think?",
+"send me the DWGs").
 
-## Come funziona
+## How it works
 
 ```
-brief.md ──> progetto.py ──(MCP execute_code)──> FreeCAD: modello 3D
+brief.md ──> project.py ──(MCP execute_code)──> FreeCAD: 3D model
                  │                                   │
-                 │                         lib/arredo.py verifica()
+                 │                      lib/interiors.py verify()
                  │                                   │
-                 │                      output/report_verifiche.md
+                 │                   output/verification_report.md
                  │                                   │
-                 └──── arredo.esporta() ──> output/*.FCStd, *.step + build/ (pianta, mesh, annotazioni)
+                 └──── interiors.export() ──> output/*.FCStd, *.step + build/ (plan, meshes, annotations)
                                                      │
-                                  tools/esporta.sh ──> output/*_Pianta.dwg, *_3D.dwg, *_Pianta.png
-                                                       (ODA File Converter + ezdxf, con controllo round-trip)
+                                  tools/export.sh ──> output/*_Plan.dwg, *_3D.dwg, *_Plan.png
+                                                      (ODA File Converter + ezdxf, with round-trip check)
 ```
 
-- Il **modello vive nello script** `progetti/<nome>/progetto.py`: ogni modifica si fa li' e si rilancia; il `.FCStd` e'
-  un prodotto, non la fonte.
-- `lib/arredo.py` e' il motore comune: primitive, porte, finestre, scorrevoli, registrazione degli usi
-  (`sedia`, `zona_prelievo`, `destinazione`, `passaggio`, `tv`, ...), verifiche ed export.
-- Le soglie stanno in `docs/regole-progettuali.md` (minimo / comfort / fonte) e nel dizionario `REGOLE` del motore.
+- The **model lives in the script** `projects/<name>/project.py`: every change is made there and rerun; the `.FCStd` is an
+  output, not the source.
+- `lib/interiors.py` is the shared engine: primitives, doors, windows, sliding doors, use registration
+  (`chair`, `access_zone`, `destination`, `clearance`, `tv`, ...), checks and export.
+- Thresholds live in `docs/design-rules.md` (minimum / comfort / source) and in the engine's `RULES` dictionary.
 
-### Comandi a mano
+### Manual commands
 
-Eseguire un progetto (dal tool MCP `execute_code`, o dalla console Python di FreeCAD):
+Run a project (from the MCP `execute_code` tool, or FreeCAD's Python console):
 
 ```python
-P = "/Users/andrea/dev/tmp/freecad/progetti/appartamento-100mq/progetto.py"
+P = "/Users/andrea/dev/tmp/freecad/projects/apartment-100sqm/project.py"
 exec(open(P).read(), {"__file__": P, "__name__": "__main__"})
 ```
 
-Esportare:
+Export:
 
 ```python
-import arredo; arredo.esporta()          # in FreeCAD, dopo aver eseguito il progetto
+import interiors; interiors.export()          # in FreeCAD, after running the project
 ```
 ```bash
-tools/esporta.sh progetti/appartamento-100mq     # nel terminale: chiude con "round-trip OK"
+tools/export.sh projects/apartment-100sqm     # in the terminal: ends with "round-trip OK"
 ```
 
-Leggere una pianta di partenza:
+Read a starting plan:
 
 ```bash
-uv run --with ezdxf python tools/leggi_pianta.py progetti/<nome>/input/pianta.dwg
+uv run --with ezdxf python tools/read_plan.py projects/<name>/input/plan.dwg
 ```
 
-## Struttura
+## Structure
 
 ```
-AGENTS.md / CLAUDE.md      istruzioni per l'agente
-README.md                  questo file
-lib/arredo.py              motore: modello, verifiche, export
-tools/                     leggi_pianta.py, esporta.sh, annota_pianta.py, esporta_3d_dwg.py
+AGENTS.md                  instructions for the agent
+CLAUDE.md / GEMINI.md      point to AGENTS.md (Claude Code, Gemini CLI)
+README.md                  this file
+lib/interiors.py           engine: model, checks, export
+tools/                     read_plan.py, export.sh, annotate_plan.py, export_3d_dwg.py
 docs/
-  metodo.md                priorita', fasi, controlli per locale, scenari, antipattern, formato di consegna
-  regole-progettuali.md    soglie
-  brief-template.md        brief da compilare
-  lezioni.md               lezioni apprese (L01, L02, ...)
-progetti/
-  _modello/progetto.py     scheletro per un nuovo progetto
-  appartamento-100mq/      esempio completo
-    brief.md, progetto.py
-    input/                 file del cliente        (esclusi da git)
-    output/                file prodotti           (esclusi da git)
-archivio/                  versioni precedenti, solo consultazione
-.claude/skills/            onboarding-progetto, arredamento, review-layout, export-autocad
+  method.md                priorities, phases, per-room checks, scenarios, antipatterns, delivery format
+  design-rules.md          thresholds
+  brief-template.md        brief to fill in
+  lessons.md               lessons learned (L01, L02, ...)
+projects/
+  _template/project.py     skeleton for a new project
+  apartment-100sqm/        complete example
+    brief.md, project.py
+    input/                 client files            (excluded from git)
+    output/                generated files         (excluded from git)
+archive/                   previous (Italian) versions, read-only
+.agents/skills/            project-onboarding, furnishing, review-layout, export-autocad (Agent Skills standard)
+.claude/skills             link to .agents/skills (Claude Code)
 ```
 
-## Aprire i risultati in AutoCAD
+## Opening the results in AutoCAD
 
 | File | AutoCAD Windows | AutoCAD Mac | AutoCAD LT |
 |---|---|---|---|
-| `*_Pianta.dwg` (2D, quote, layer) | Apri | Apri | Apri |
-| `*_3D.dwg` (mesh colorate, un layer per locale) | Apri | Apri | Apri (visualizzazione) |
-| `*_3D.step` (solidi modificabili) | `IMPORT` | non supportato | non supportato |
+| `*_Plan.dwg` (2D, dimensions, layers) | Open | Open | Open |
+| `*_3D.dwg` (coloured meshes, one layer per room) | Open | Open | Open (viewing) |
+| `*_3D.step` (editable solids) | `IMPORT` | not supported | not supported |
 
-I DWG sono in formato AutoCAD 2018, unita' millimetri.
+DWG files are AutoCAD 2018 format, units in millimetres.
 
-## Limiti
+## Limits
 
-- Verifiche **geometriche e funzionali**: impianti, strutture, normativa locale, acustica e illuminotecnica non sono
-  modellati e compaiono nel report come NON VERIFICABILE.
-- Gli arredi sono **ingombri indicativi**: per un progetto reale vanno sostituiti con le misure delle schede prodotto.
-- Le misure valgono quanto la fonte: da foto o piante senza scala si ottengono solo schemi, dichiarati come stimati.
-- I percorsi assoluti (`/Users/andrea/dev/tmp/freecad/...`) negli esempi vanno adattati se la cartella viene spostata.
+- **Geometric and functional** checks: building services, structure, local regulations, acoustics and lighting are not
+  modelled and appear in the report as NOT VERIFIABLE.
+- Furniture are **indicative footprints**: on a real project replace them with the dimensions from product data sheets.
+- Dimensions are only as good as their source: photos or unscaled plans give layouts only, declared as estimated.
+- Absolute paths (`/Users/andrea/dev/tmp/freecad/...`) in the examples must be adapted if the folder is moved.
+- On Windows, git recreates the `.claude/skills` symlink only with `core.symlinks` enabled.
 
-## Riferimenti
+## References
 
-- Metodo: prompt base di progettazione residenziale (Astra) e flusso a fasi di
-  [interioragent](https://github.com/KunalMGupta/interioragent), integrati in `docs/metodo.md`.
-- Ponte FreeCAD <-> MCP: [neka-nat/freecad-mcp](https://github.com/neka-nat/freecad-mcp).
-- Licenza: MIT, vedi `LICENSE`.
+- Method: base residential design prompt (Astra) and phased workflow of
+  [interioragent](https://github.com/KunalMGupta/interioragent), merged into `docs/method.md`.
+- FreeCAD <-> MCP bridge: [neka-nat/freecad-mcp](https://github.com/neka-nat/freecad-mcp).
+- Agent Skills standard: [agentskills.io](https://agentskills.io/specification).
+- License: MIT, see `LICENSE`.

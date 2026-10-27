@@ -1,75 +1,76 @@
-# Brief - <nome progetto>
+# Brief - <project name>
 
-Ogni dato porta la sua **fonte**: `misurato` (rilievo / quota in DWG), `documentato` (planimetria con scala, scheda prodotto),
-`stimato` (da foto o proporzioni), `assunto` (scelta di default da confermare). Solo `misurato` e `documentato` reggono una verifica dimensionale.
+Every item carries its **source**: `measured` (survey / dimension in a DWG), `documented` (scaled drawing, product data sheet),
+`estimated` (from photos or proportions), `assumed` (default choice to be confirmed). Only `measured` and `documented`
+support a dimensional check.
 
-## 1. Perimetro
+## 1. Scope
 
-| Voce | Valore | Fonte |
+| Item | Value | Source |
 |---|---|---|
-| Localita' (comune) | | |
-| Tipo di immobile, piano, ascensore (dimensioni cabina) | | |
-| Tipo di intervento: solo arredo / riorganizzazione interna / ristrutturazione / nuova costruzione | | |
-| Modifiche ammesse: tramezzi, porte, finestre, impianti, facciata | | |
-| File di partenza (DWG/DXF/PDF/foto/rilievo) e loro attendibilita' | | |
-| Scala, unita', origine, nord | | |
-| Altezze nette, controsoffitti, travi, pilastri, fuori squadra | | |
+| Location (municipality) | | |
+| Building type, floor, lift (car size) | | |
+| Type of work: furnishing only / internal reorganisation / renovation / new build | | |
+| Allowed changes: partitions, doors, windows, services, facade | | |
+| Starting files (DWG/DXF/PDF/photos/survey) and their reliability | | |
+| Scale, units, origin, north | | |
+| Clear heights, false ceilings, beams, columns, out-of-square walls | | |
 
-## 2. Abitanti e uso
+## 2. Occupants and use
 
-| Voce | Valore | Fonte |
+| Item | Value | Source |
 |---|---|---|
-| Numero, eta', corporatura rilevante | | |
-| Esigenze motorie o sensoriali, accessibilita' futura | | |
-| Animali, ospiti abituali (quanti, quanto spesso, dove dormono) | | |
-| Lavoro da casa (postazione continuativa o occasionale, videochiamate) | | |
-| Cucina: quanto e come si cucina, quanti cucinano insieme, lavastoviglie, dispensa, raccolta differenziata | | |
-| Pasti: posti abituali / posti con ospiti, tavolo allungabile | | |
-| Riposo: lato letto, oscuramento, luce di lettura, TV in camera si/no | | |
-| Intrattenimento: TV (pollici), proiettore, musica, giochi | | |
-| Lavanderia: lavatrice, asciugatrice, stendibiancheria, deposito detersivi | | |
+| Number, age, relevant body size | | |
+| Mobility or sensory needs, future accessibility | | |
+| Pets, regular guests (how many, how often, where they sleep) | | |
+| Working from home (permanent or occasional desk, video calls) | | |
+| Kitchen: how much and how people cook, how many cook together, dishwasher, pantry, recycling | | |
+| Meals: everyday seats / seats with guests, extending table | | |
+| Sleep: bed side, blackout, reading lights, TV in the bedroom yes/no | | |
+| Entertainment: TV (inches), projector, music, games | | |
+| Laundry: washer, dryer, drying rack, detergent storage | | |
 
-## 3. Programma
+## 3. Programme
 
-| Ambiente / attivita' | Indispensabile o desiderabile | Note |
+| Room / activity | Essential or desirable | Notes |
 |---|---|---|
 | | | |
 
-## 4. Contenimento
+## 4. Storage
 
-| Categoria | Quantita' (es. metri lineari appesi, paia di scarpe, valigie) |
+| Category | Quantity (e.g. metres of hanging clothes, pairs of shoes, suitcases) |
 |---|---|
-| Abiti appesi lunghi / corti | |
-| Biancheria, scarpe, valigie | |
-| Pulizie, attrezzi, scorte | |
+| Long / short hanging clothes | |
+| Linen, shoes, suitcases | |
+| Cleaning, tools, supplies | |
 
-## 5. Stile e prodotti
+## 5. Style and products
 
-| Voce | Valore |
+| Item | Value |
 |---|---|
-| Tipologia di arredamento (es. moderno, scandinavo, japandi, industriale, classico contemporaneo, mid-century) | |
-| Palette, materiali, finiture, riferimenti (foto, link) | |
-| Arredi da conservare (con misure reali) | |
-| Prodotti gia' scelti (con scheda tecnica) | |
-| Clima desiderato (es. "non opprimente", accogliente, essenziale) | |
+| Furnishing style (e.g. modern, Scandinavian, japandi, industrial, contemporary classic, mid-century) | |
+| Palette, materials, finishes, references (photos, links) | |
+| Furniture to keep (with real dimensions) | |
+| Products already chosen (with data sheet) | |
+| Desired feel (e.g. "not oppressive", cosy, essential) | |
 
-## 6. Vincoli
+## 6. Constraints
 
-| Voce | Valore |
+| Item | Value |
 |---|---|
-| Impianti fissi: colonne di scarico, quadro, caldaia, radiatori/split, prese esistenti | |
-| Orientamento, affacci, rumore, privacy verso l'esterno | |
-| Elementi esplicitamente vietati (es. TV vicino alle finestre) | |
-| Budget (arredi / opere / impianti) e tempi | |
+| Fixed services: soil stacks, electrical panel, boiler, radiators/split units, existing sockets | |
+| Orientation, views, noise, privacy from outside | |
+| Explicitly forbidden elements (e.g. TV next to windows) | |
+| Budget (furniture / works / services) and timing | |
 
-## 7. Consegna
+## 7. Deliverables
 
-| Voce | Valore |
+| Item | Value |
 |---|---|
-| Formati: DWG 2D, DWG 3D, STEP, PNG, report verifiche, tabella arredi | |
-| Versione AutoCAD (Windows / Mac / LT) | |
+| Formats: 2D DWG, 3D DWG, STEP, PNG, verification report, furniture schedule | |
+| AutoCAD version (Windows / Mac / LT) | |
 
-## Registro assunzioni e punti aperti
+## Assumption log and open points
 
-| # | Assunzione o dato mancante | Impatto se sbagliato | Stato (da confermare / confermato) |
+| # | Assumption or missing data | Impact if wrong | Status (to confirm / confirmed) |
 |---|---|---|---|

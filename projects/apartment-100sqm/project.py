@@ -1,0 +1,253 @@
+# Apartment ~100 m2 (12.5 x 8.0 m gross). Brief and assumptions: brief.md.
+# Run in FreeCAD through MCP:
+#   P = "/Users/andrea/dev/tmp/freecad/projects/apartment-100sqm/project.py"
+#   exec(open(P).read(), {"__file__": P, "__name__": "__main__"})
+import importlib
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "lib"))
+import interiors  # noqa: E402
+importlib.reload(interiors)
+from interiors import *  # noqa: E402,F403
+
+new_project("Apartment", HERE, interior=(0.30, 0.30, 12.20, 7.70), height=2.70)
+c = COL
+FA = RULES["armored_frame"]
+FR = RULES["frame"]
+
+# ======================= PHASE 1 - ENVELOPE, OPENINGS, WALLS =======================
+window("Window_Living", 0.15, 1.00, 5.50, 0, 2.40, "Living area", mullion=True)        # lift-and-slide
+window("French_Window_Bedroom", 0.15, 8.20, 10.60, 0, 2.40, "Bedroom", mullion=True)   # sliding
+window("Window_Kitchen", 7.85, 1.40, 3.20, 1.20, 2.20, "Living area", mullion=True)    # 2 inward leaves
+window("Window_Bathroom", 7.85, 9.55, 10.15, 1.60, 2.20, "Bathroom")                   # 1 inward leaf
+hinged("Window_Kitchen_Leaf_L", 1.45, 7.70, (1, 0), (0, -1), 0.825, z0=1.23, hgt=2.15, leaf=False, kind="Window", handle=False)
+hinged("Window_Kitchen_Leaf_R", 3.15, 7.70, (-1, 0), (0, -1), 0.825, z0=1.23, hgt=2.15, leaf=False, kind="Window", handle=False)
+hinged("Window_Bathroom_Leaf", 9.60, 7.70, (1, 0), (0, -1), 0.50, z0=1.63, hgt=2.15, leaf=False, kind="Window", handle=False)
+
+opening("Door_Entrance", 6.75, 7.65, 7.80, 8.05, 2.20, 0.90, 2.10, "armored, 7.5 cm subframe")
+jambs("Door_Entrance", 6.75, 7.70, 7.80, 8.00, 2.20, FA)
+hinged("Door_Entrance", 7.725, 7.70, (-1, 0), (0, -1), 0.90, color=c["DARK"], frame=FA)
+
+opening("Door_Bedroom", 6.70, 3.50, 7.60, 3.70, 2.15, 0.80, 2.10)
+jambs("Door_Bedroom", 6.70, 3.55, 7.60, 3.65, 2.15, FR)
+hinged("Door_Bedroom", 6.75, 3.55, (1, 0), (0, -1), 0.80)
+
+opening("Door_Bathroom", 8.20, 4.70, 9.10, 4.90, 2.15, 0.80, 2.10)
+jambs("Door_Bathroom", 8.20, 4.75, 9.10, 4.85, 2.15, FR)
+hinged("Door_Bathroom", 8.25, 4.85, (1, 0), (0, 1), 0.80)
+
+opening("Door_Night_Zone", 6.40, 3.75, 6.60, 4.65, 2.15, 0.90, 2.10, "surface-mounted sliding")
+sliding("Door_Night_Zone", (6.40, 3.70, 0.01, 6.44, 4.70, 2.15), (6.40, 2.70, 0.01, 6.44, 3.70, 2.15))
+opening("Door_Closet", 10.50, 4.70, 11.20, 4.90, 2.15, 0.70, 2.10, "surface-mounted sliding")
+sliding("Door_Closet", (10.45, 4.69, 0.01, 11.25, 4.73, 2.15), (9.65, 4.69, 0.01, 10.45, 4.73, 2.15))
+
+wall("Wall_South", 0, 0, 12.5, 0.3)
+wall("Wall_North", 0, 7.7, 12.5, 8.0)
+wall("Wall_West", 0, 0.3, 0.3, 7.7)
+wall("Wall_East", 12.2, 0.3, 12.5, 7.7)
+wall("Partition_Living", 6.45, 0.3, 6.55, 4.75)
+wall("Partition_Bedroom", 6.55, 3.55, 12.2, 3.65)
+wall("Partition_Hall_North", 6.45, 4.75, 12.2, 4.85)
+wall("Partition_Entrance_Bathroom", 7.95, 4.85, 8.05, 7.7)
+wall("Partition_Bathroom_Closet", 10.25, 4.85, 10.35, 7.7)
+box("Slab", 0, 0, -0.20, 12.5, 8.0, 0, c["FLOOR"], "Structure", check=False)
+box("Tiles_Bathroom", 8.05, 4.85, 0, 10.25, 7.7, 0.004, c["TILE"], "Structure", check=False)
+
+room("Living area", [(0.30, 0.30, 6.45, 4.85), (0.30, 4.85, 7.95, 7.70)], (2.90, 4.45))
+room("Bedroom", [(6.55, 0.30, 12.20, 3.55)], (8.70, 2.60))
+room("Bathroom", [(8.05, 4.85, 10.25, 7.70)], (9.20, 6.25), habitable=False, kind="bathroom", lines=["BATH"])
+room("Walk-in closet", [(10.35, 4.85, 12.20, 7.70)], (10.77, 6.25), habitable=False, lines=["WALK-IN", "CLOSET"])
+room("Night hall", [(6.55, 3.65, 12.20, 4.75)], (9.30, 4.30), habitable=False)
+
+# ======================= PHASE 2 - MAIN FURNITURE =======================
+g = "Living"
+box("TV_Unit", 0.30, 1.40, 0.15, 0.75, 3.40, 0.55, c["OAK"], g)
+box("TV_65", 0.31, 1.75, 0.95, 0.36, 3.05, 1.70, c["BLACK"], g)
+box("Sofa_Seat", 3.40, 1.20, 0.01, 4.30, 3.60, 0.42, c["GREY"], g, item="Sofa")
+box("Sofa_Back", 4.30, 1.00, 0.01, 4.50, 3.80, 0.80, c["GREY"], g, item="Sofa")
+box("Sofa_Arm_S", 3.40, 1.00, 0.01, 4.30, 1.20, 0.60, c["GREY"], g, item="Sofa")
+box("Sofa_Arm_N", 3.40, 3.60, 0.01, 4.30, 3.80, 0.60, c["GREY"], g, item="Sofa")
+box("Sofa_Chaise", 2.60, 3.00, 0.01, 3.40, 3.80, 0.42, c["GREY"], g, item="Sofa")
+box("Sofa_Cushions", 4.10, 1.25, 0.42, 4.30, 3.55, 0.72, c["SAGE"], g, item="Sofa")
+box("Coffee_Table_Base", 2.00, 1.90, 0.01, 2.50, 2.50, 0.33, c["BLACK"], g, item="Coffee_Table")
+box("Coffee_Table_Top", 1.90, 1.80, 0.33, 2.60, 2.60, 0.38, c["OAK"], g, item="Coffee_Table")
+box("Armchair_Seat", 1.30, 0.60, 0.01, 2.10, 1.25, 0.42, c["TERRA"], g, item="Armchair")
+box("Armchair_Back", 1.30, 0.42, 0.01, 2.10, 0.60, 0.82, c["TERRA"], g, item="Armchair")
+shelf = [B(5.95, 0.60, 0, 6.45, 2.60, 0.03)]
+for z in (0.40, 0.80, 1.20, 1.60, 1.97):
+    shelf.append(B(5.95, 0.60, z, 6.45, 2.60, z + 0.03))
+shelf += [B(5.95, 0.60, 0, 6.45, 0.63, 2.0), B(5.95, 2.57, 0, 6.45, 2.60, 2.0), B(5.95, 1.585, 0, 6.45, 1.615, 2.0)]
+add("Bookcase", Part.makeCompound(shelf), c["OAK"], g)
+tv("TV_65")
+
+g = "Dining"
+TX, TY, TR = 5.35, 6.10, 0.55
+cyl("Table_Base", TX, TY, 0, 0.28, 0.03, c["BLACK"], g, item="Table")
+cyl("Table_Leg", TX, TY, 0.03, 0.06, 0.69, c["BLACK"], g, item="Table")
+cyl("Table_Top", TX, TY, 0.72, TR, 0.03, c["OAK"], g, item="Table")
+for i, (dx, dy) in enumerate([(-1, 0), (1, 0), (0, -1), (0, 1)]):   # 1=west 2=east 3=south 4=north
+    chair("Chair_%d" % (i + 1), TX + dx * 0.75, TY + dy * 0.75, dx, dy, g, "Table", TR)
+height_match("Table / chairs", 0.75, 0.47)
+
+g = "Kitchen"
+box("Tall_Units_Fridge_Oven", 0.30, 5.00, 0, 0.90, 7.70, 2.30, c["WHITE"], g)
+box("Plinth", 0.90, 7.15, 0, 4.20, 7.70, 0.10, c["BLACK"], g, item="Base_Units")
+box("Base_Units", 0.90, 7.10, 0.10, 4.20, 7.70, 0.86, c["WHITE"], g, item="Base_Units")
+box("Worktop", 0.90, 7.05, 0.86, 4.20, 7.70, 0.90, c["BLACK"], g, item="Base_Units")
+box("Island_Base", 1.80, 5.40, 0, 3.70, 6.10, 0.90, c["WHITE"], g, item="Island")
+box("Island_Top", 1.75, 5.05, 0.90, 3.75, 6.15, 0.94, c["OAK"], g, item="Island")
+for i, x in enumerate((2.15, 2.75, 3.35)):
+    n = "Stool_%d" % (i + 1)
+    cyl(n + "_Seat", x, 4.85, 0.62, 0.19, 0.05, c["BLACK"], g, item=n)
+    cyl(n + "_Leg", x, 4.85, 0, 0.03, 0.62, c["BLACK"], g, item=n)
+    seat(n, (n, "Island"), (x, 5.05), (0, -1), 0.19)
+height_match("Island / stools", 0.94, 0.67)
+
+g = "Entrance"
+box("Entrance_Wardrobe", 6.95, 4.85, 0, 7.95, 5.30, 2.40, c["WHITE"], g)
+hinged("Entrance_Wardrobe_Leaf_1", 6.95, 5.30, (1, 0), (0, 1), 0.50, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False)
+hinged("Entrance_Wardrobe_Leaf_2", 7.95, 5.30, (-1, 0), (0, 1), 0.50, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False)
+access_zone("Entrance: in front of wardrobe", 6.96, 5.305, 7.92, 6.01, ("Entrance_Wardrobe",))
+
+g = "Night_Hall"
+box("Utility_Cupboard", 11.75, 3.65, 0, 12.20, 4.75, 2.40, c["WHITE"], g)
+hinged("Utility_Cupboard_Leaf", 11.75, 3.70, (0, 1), (-1, 0), 0.90, hgt=2.40, leaf=False, kind="Wardrobe leaf", handle=False)
+
+g = "Bedroom"
+box("Bed_Headboard", 12.08, 0.95, 0.01, 12.20, 2.95, 1.10, c["GREY"], g, item="Bed")
+box("Bed_Frame", 10.00, 1.00, 0.05, 12.08, 2.90, 0.35, c["OAK"], g, item="Bed")
+box("Bed_Mattress", 10.05, 1.05, 0.35, 12.05, 2.85, 0.60, c["WHITE"], g, item="Bed")
+box("Bed_Duvet", 10.05, 1.05, 0.60, 11.50, 2.85, 0.65, c["SAGE"], g, item="Bed")
+box("Bed_Pillow_1", 11.60, 1.15, 0.60, 12.00, 1.85, 0.72, c["WHITE"], g, item="Bed")
+box("Bed_Pillow_2", 11.60, 2.05, 0.60, 12.00, 2.75, 0.72, c["WHITE"], g, item="Bed")
+for i, (y0, y1) in enumerate([(0.45, 0.90), (2.95, 3.40)]):
+    box("Nightstand_%d" % (i + 1), 11.70, y0, 0.01, 12.15, y1, 0.45, c["OAK"], g)
+    cyl("Bedside_Lamp_%d" % (i + 1), 11.92, (y0 + y1) / 2, 0.45, 0.10, 0.30, c["WHITE"], g)
+box("Desk_Top", 6.55, 0.80, 0.72, 7.15, 2.20, 0.75, c["OAK"], g, item="Desk")
+box("Desk_Leg_1", 7.08, 0.82, 0, 7.13, 0.87, 0.72, c["BLACK"], g, item="Desk")
+box("Desk_Leg_2", 7.08, 2.13, 0, 7.13, 2.18, 0.72, c["BLACK"], g, item="Desk")
+box("Desk_Chair_Seat", 7.25, 1.27, 0.43, 7.67, 1.69, 0.47, c["BLACK"], g, item="Desk_Chair")
+box("Desk_Chair_Back", 7.64, 1.27, 0.47, 7.67, 1.69, 0.85, c["BLACK"], g, item="Desk_Chair")
+box("Desk_Chair_Leg", 7.42, 1.44, 0, 7.50, 1.52, 0.43, c["BLACK"], g, item="Desk_Chair")
+seat("Desk_Chair", ("Desk_Chair", "Desk"), (7.15, 1.48), (1, 0), 0.21)
+height_match("Desk / chair", 0.75, 0.47)
+
+g = "Bathroom"
+box("Vanity_Unit", 8.05, 5.80, 0.55, 8.55, 6.60, 0.85, c["OAK"], g, item="Washbasin")
+box("Washbasin", 8.10, 5.90, 0.85, 8.50, 6.50, 0.97, c["WHITE"], g, item="Washbasin")
+cyl("Washbasin_Tap", 8.12, 6.20, 0.97, 0.015, 0.20, c["STEEL"], g, item="Washbasin")
+box("WC_Wall_Hung", 9.70, 5.97, 0.25, 10.25, 6.33, 0.40, c["WHITE"], g, item="WC")
+box("WC_Lid", 9.72, 5.99, 0.40, 10.20, 6.31, 0.43, c["WHITE"], g, item="WC")
+box("Bidet_Wall_Hung", 9.70, 5.20, 0.25, 10.25, 5.56, 0.40, c["WHITE"], g)
+box("Shower_Tray", 8.05, 6.70, 0.004, 9.45, 7.70, 0.03, c["WHITE"], g)
+box("Shower_Glass", 8.05, 6.70, 0.03, 8.85, 6.71, 2.00, c["GLASS"], g, tr=60)
+box("Washing_Machine", 9.65, 7.10, 0, 10.25, 7.70, 0.85, c["WHITE"], g)
+
+g = "Walk_in_Closet"
+
+
+def open_wardrobe(name, x0, y0, x1, y1, along, posts, rails, shelves_bay, drawer_bay):
+    """Open 60 cm deep unit (along='y': front towards -x; 'x': front towards -y)."""
+    p = []
+    for q in posts:
+        p.append(B(q - 0.01, y0, 0, q + 0.01, y1, 2.40) if along == "x" else B(x0, q - 0.01, 0, x1, q + 0.01, 2.40))
+    p += [B(x0, y0, 2.38, x1, y1, 2.40), B(x0, y0, 2.00, x1, y1, 2.02)]
+    for i in range(len(posts) - 1):
+        a0, a1 = posts[i] + 0.01, posts[i + 1] - 0.01
+        seg = (lambda z0, z1: B(x0, a0, z0, x1, a1, z1)) if along == "y" else (lambda z0, z1: B(a0, y0, z0, a1, y1, z1))
+        if i in shelves_bay:
+            p += [seg(z, z + 0.02) for z in (0.40, 0.75, 1.10, 1.45)]
+        if i in drawer_bay:
+            p += [seg(0.0, 0.70), seg(1.25, 1.27)]
+    add(name, Part.makeCompound(p), c["WHITE"], g)
+    for i in rails:
+        a0, a1 = posts[i] + 0.01, posts[i + 1] - 0.01
+        if along == "y":
+            r = Part.makeCylinder(0.012 * S, (a1 - a0) * S, V((x0 + x1) / 2 * S, a0 * S, 1.85 * S), V(0, 1, 0))
+        else:
+            r = Part.makeCylinder(0.012 * S, (a1 - a0) * S, V(a0 * S, (y0 + y1) / 2 * S, 1.85 * S), V(1, 0, 0))
+        add("%s_Rail_%d" % (name, i + 1), r, c["STEEL"], g, item=name)
+
+
+open_wardrobe("Closet_Unit_East", 11.60, 4.85, 12.20, 7.70, "y", [4.86, 5.80, 6.75, 7.69], [0, 1], [2], [0])
+open_wardrobe("Closet_Unit_North", 10.35, 7.10, 11.60, 7.70, "x", [10.36, 10.98, 11.59], [1], [0], [])
+access_zone("Closet: in front of east unit", 10.89, 4.86, 11.595, 7.09, ("Closet_Unit_East",))
+access_zone("Closet: in front of north unit", 10.38, 6.39, 11.59, 7.095, ("Closet_Unit_North",))
+
+# ======================= PHASE 3 - DETAILS, LIGHTING, DECOR =======================
+box("Rug", 1.20, 0.80, 0, 4.00, 3.60, 0.01, c["RUG"], "Living", check=False)
+# reading light next to the armchair: in its previous position it closed the access to the sofa (25 cm), lesson L06
+cyl("Floor_Lamp_Base", 1.05, 0.70, 0, 0.15, 0.03, c["BLACK"], "Living", item="Floor_Lamp")
+cyl("Floor_Lamp_Stem", 1.05, 0.70, 0.03, 0.015, 1.50, c["BLACK"], "Living", item="Floor_Lamp")
+cyl("Floor_Lamp_Shade", 1.05, 0.70, 1.50, 0.20, 0.25, c["WHITE"], "Living", item="Floor_Lamp")
+cyl("Plant_Pot", 5.85, 3.35, 0, 0.20, 0.45, c["TERRA"], "Living", item="Plant")
+add("Plant_Foliage", Part.makeSphere(0.35 * S, V(5.85 * S, 3.35 * S, 0.95 * S)), c["GREEN"], "Living", item="Plant")
+cyl("Pendant_Table", TX, TY, 1.75, 0.25, 0.18, c["BLACK"], "Dining", item="Pendant_Table")
+cyl("Pendant_Table_Cord", TX, TY, 1.93, 0.005, 2.70 - 1.93, c["BLACK"], "Dining", item="Pendant_Table")
+for i, x in enumerate((2.35, 3.15)):
+    cyl("Pendant_Island_%d" % (i + 1), x, 5.60, 1.70, 0.12, 0.18, c["BLACK"], "Kitchen", item="Pendant_Island_%d" % i)
+    cyl("Pendant_Island_%d_Cord" % (i + 1), x, 5.60, 1.88, 0.005, 2.70 - 1.88, c["BLACK"], "Kitchen", item="Pendant_Island_%d" % i)
+box("Hob", 3.35, 7.15, 0.90, 3.95, 7.65, 0.905, (0.05, 0.05, 0.05), "Kitchen")
+box("Sink", 1.90, 7.20, 0.90, 2.70, 7.60, 0.91, c["STEEL"], "Kitchen")
+cyl("Tap", 2.30, 7.63, 0.91, 0.02, 0.20, c["STEEL"], "Kitchen")       # top 1.11 < sill 1.20
+box("Wall_Units_East", 3.25, 7.35, 1.50, 4.20, 7.70, 2.30, c["WHITE"], "Kitchen")
+box("Integrated_Hood", 3.35, 7.35, 1.40, 3.95, 7.70, 1.50, c["STEEL"], "Kitchen")
+box("Entrance_Mirror", 7.93, 5.85, 1.00, 7.95, 6.65, 2.00, c["GLASS"], "Entrance", tr=30)
+box("Entrance_Mat", 6.90, 6.90, 0, 7.65, 7.40, 0.01, c["DARK"], "Entrance", check=False)
+box("Bedroom_Rug", 9.30, 0.60, 0, 11.60, 3.30, 0.01, c["RUG"], "Bedroom", check=False)
+box("Bathroom_Mirror", 8.05, 5.85, 1.10, 8.07, 6.55, 1.90, c["GLASS"], "Bathroom", tr=30)
+cyl("Shower_Head", 8.45, 7.45, 2.05, 0.12, 0.02, c["STEEL"], "Bathroom", item="Shower_Head")
+box("Shower_Arm", 8.43, 7.45, 2.07, 8.47, 7.70, 2.10, c["STEEL"], "Bathroom", item="Shower_Head")
+box("Towel_Warmer", 10.20, 6.45, 0.50, 10.25, 6.95, 1.50, c["STEEL"], "Bathroom")
+box("Closet_Mirror", 10.35, 5.20, 0.30, 10.37, 6.00, 2.00, c["GLASS"], "Walk_in_Closet", tr=30)
+
+# ======================= USES, ROUTES, CLEARANCES =======================
+entrance(7.10, 7.25)
+destination("Living: sofa (in front of seat)", 3.00, 2.00)
+destination("Living: armchair", 2.70, 1.10)
+destination("Living: table east side", 6.75, 6.10)
+destination("Kitchen: sink", 2.30, 6.60)
+destination("Kitchen: fridge/oven tall units", 1.30, 6.00)
+destination("Entrance: wardrobe", 7.45, 5.70)
+destination("Bedroom: bed south side", 11.00, 0.65)
+destination("Bedroom: bed north side", 11.00, 3.22)
+destination("Bedroom: desk", 8.00, 1.48)
+destination("Bathroom: washbasin", 8.90, 6.20)
+destination("Bathroom: WC", 9.30, 6.15)
+destination("Bathroom: shower", 9.00, 7.20)
+destination("Closet: in front of units", 11.10, 6.00)
+destination("Night hall: utility cupboard", 11.30, 4.20)
+route("Night route bed -> WC", "Bedroom: bed north side", "Bathroom: WC")
+
+clearance("Entrance -> night zone: east chair / entrance wardrobe", "Chair_2", "Entrance_Wardrobe", 0.80, 0.90)
+clearance("Entrance -> night zone: south chair / partition", "Chair_3", "Partition_Living", 0.80, 0.90)
+clearance("Kitchen: island / base units", "Island_Top", "Worktop", 0.90, 1.10)
+clearance("Kitchen: island / tall units", "Island_Top", "Tall_Units_Fridge_Oven", 0.80, 0.90)
+clearance("Night hall: width", "Partition_Bedroom", "Partition_Hall_North", 1.00, 1.10)
+clearance("Bedroom: bed south side", "Bed_Frame", "Wall_South", 0.60, 0.70)
+clearance("Bedroom: bed north side", "Bed_Frame", "Partition_Bedroom", 0.60, 0.70)
+clearance("Closet: in front of east unit", "Closet_Unit_East", "Partition_Bathroom_Closet", 0.90, 1.00)
+
+not_verifiable("Living window 4.60 m rough opening", "lintel to be sized by a structural engineer")
+
+# ======================= PLAN ANNOTATIONS =======================
+dimensions([0, 0.95, 5.55, 8.15, 10.65, 12.5], True, -0.5)
+dimensions([0, 0.3, 6.45, 6.55, 12.2, 12.5], True, -0.9)
+dimensions([0, 12.5], True, -1.3)
+dimensions([0, 0.3, 1.35, 3.25, 6.75, 7.80, 9.50, 10.20, 12.2, 12.5], True, 8.6)
+dimensions([0, 0.3, 7.7, 8.0], False, -0.6)
+dimensions([0, 8.0], False, -1.0)
+dimensions([0, 0.3, 3.55, 3.65, 4.75, 4.85, 7.7, 8.0], False, 13.1)
+for t, x, y in [
+    ("D 90x210 armored - opening 105x220", 7.275, 8.25), ("D 90x210 sliding", 5.70, 4.20),
+    ("D 80x210 - opening 90x215", 7.40, 2.55), ("D 80x210", 8.65, 4.56), ("D 70x210 sliding", 10.85, 4.42),
+    ("UC", 11.975, 4.20), ("W 180x100 sill h120 - 2 leaves", 2.30, 8.25), ("W 60x60 h160", 9.85, 8.25),
+    ("FW 450x240 sliding", 3.25, -0.25), ("FW 240x240 sliding", 9.40, -0.25),
+]:
+    label(t, x, y)
+note("Wall openings enlarged by 5 cm per side for subframes/jambs (7.5 cm armored door)  -  "
+     "D = door, W = window, FW = French window, UC = utility cupboard  -  4.60 m opening: lintel to be sized by a structural engineer")
+
+verify()
