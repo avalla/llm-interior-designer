@@ -11,8 +11,8 @@ jobs:
     name: Structure, scorer, lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Lint (ruff)
@@ -30,8 +30,8 @@ jobs:
       run:
         shell: bash -el {0}
     steps:
-      - uses: actions/checkout@v4
-      - uses: mamba-org/setup-micromamba@v2
+      - uses: actions/checkout@v7
+      - uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: freecad
           create-args: freecad>=1.0 python
@@ -45,7 +45,7 @@ jobs:
         run: python ci/assert_engine.py
       - name: Upload eval report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: engine-eval
           path: |
