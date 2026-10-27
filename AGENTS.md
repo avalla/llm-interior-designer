@@ -40,6 +40,8 @@ Reusable base for designing and checking furnishing layouts (apartments, villas,
 - Variants: set `PROJECT` and `GRID`, then `exec(open(".../tools/explore.py").read(), {"PROJECT": PROJECT, "GRID": GRID})`
   in FreeCAD; ranking in `output/variants.md`.
 - Engine eval: `exec(open(".../evals/run_engine.py").read(), {})` in FreeCAD; review scoring: `python3 evals/score_review.py <case>`.
+- CI (`.github/workflows/ci.yml`) runs `ci/check_repo.py`, `ci/test_score_review.py`, ruff and the headless engine run
+  (`ci/engine_ci.py`); run them locally before pushing (commands in README, Continuous integration).
 
 ## Conventions
 

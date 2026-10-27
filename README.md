@@ -1,5 +1,7 @@
 # Interior design with FreeCAD and AI agents
 
+[![CI](https://github.com/avalla/llm-interior-designer/actions/workflows/ci.yml/badge.svg)](https://github.com/avalla/llm-interior-designer/actions/workflows/ci.yml)
+
 A working base for designing **interior layouts and furnishing** of apartments and villas by talking to an agent
 (Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode). The agent builds the 3D model in FreeCAD, **checks** it
 against real-use rules (doors that open, space behind chairs, routes, daylight, wardrobe assembly...) and delivers the
@@ -154,6 +156,19 @@ Read a starting plan:
 uv run --with ezdxf python tools/read_plan.py projects/<name>/input/plan.dwg
 ```
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request:
+
+| Job | What it checks |
+|---|---|
+| Structure, scorer, lint | `ruff`; skills follow the Agent Skills format; `.claude/skills` symlink; eval fixtures well formed; Markdown links; unit test of `evals/score_review.py` |
+| Engine regression | headless FreeCAD (conda-forge): every planted defect in `evals/fixtures` detected, no unexpected NON-COMPLIANT result, every project in `projects/` at 0 problems |
+
+Run the same locally: `python3 ci/check_repo.py`, `python3 ci/test_score_review.py`, `uvx ruff check .`, and
+`INTERIORS_ROOT=$PWD /Applications/FreeCAD.app/Contents/Resources/bin/freecadcmd ci/engine_ci.py && python3 ci/assert_engine.py`.
+Blind reviews and pre-mortems need an AI agent and stay manual (skill `prompt-evals`).
+
 ## Structure
 
 ```
@@ -170,6 +185,8 @@ docs/
   patterns.md              pattern language (P01, P02, ...)
   fmea.md                  failure modes ranked by risk
 evals/                     fixtures with planted defects, engine eval, review scoring, history
+ci/                        CI scripts (repository checks, scorer test, headless engine run)
+.github/workflows/ci.yml   CI pipeline
 projects/
   _template/project.py     skeleton for a new project
   apartment-100sqm/        complete example

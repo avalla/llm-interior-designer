@@ -2,6 +2,7 @@
 projects/*/output/
 evals/fixtures/*/output/
 evals/results/
+ci/engine_result.json
 build/
 # loose CAD exports (e.g. archive/)
 *.FCStd

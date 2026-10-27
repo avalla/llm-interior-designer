@@ -7,7 +7,8 @@ import glob
 import json
 import os
 
-ROOT = "/Users/andrea/dev/tmp/freecad/evals"
+# repository root: INTERIORS_ROOT (CI) or the author's checkout
+ROOT = os.path.join(os.environ.get("INTERIORS_ROOT", "/Users/andrea/dev/tmp/freecad"), "evals")
 lines = ["# Engine eval", "", "| Fixture | Defect | Expected | Detected |", "|---|---|---|---|"]
 extra_lines = []
 total = found = 0

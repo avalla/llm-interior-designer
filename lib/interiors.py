@@ -84,13 +84,26 @@ def group(n):
     return ST.groups[n]
 
 
+def _paint(o, color, tr=None):
+    """Colour an object; headless FreeCAD (freecadcmd, CI) has no ViewObject: keep the values on the side."""
+    if not hasattr(o, "IntColor"):
+        o.addProperty("App::PropertyColor", "IntColor", "Interiors")
+        o.addProperty("App::PropertyInteger", "IntTransparency", "Interiors")
+    o.IntColor = color
+    if tr is not None:
+        o.IntTransparency = tr
+    if getattr(o, "ViewObject", None) is not None:
+        o.ViewObject.ShapeColor = color
+        if tr is not None:
+            o.ViewObject.Transparency = tr
+
+
 def add(name, shape, color, g, check=True, tr=0, item=None):
     """Add a solid. check=True makes it an obstacle for every verification;
     parts of the same piece of furniture share item= so they are not reported against each other."""
     o = ST.doc.addObject("Part::Feature", name)
     o.Shape = shape
-    o.ViewObject.ShapeColor = color
-    o.ViewObject.Transparency = tr
+    _paint(o, color, tr)
     group(g).addObject(o)
     if check:
         ST.CHECK.append((item or name, o.Label, shape, g))
@@ -147,7 +160,8 @@ def jambs(name, x0, y0, x1, y1, z1, fr):
 
 def hinged(name, hx, hy, d, n, w, kind="Door", color=None, hgt=2.10, z0=0.0, leaf=True,
            frame=None, handle=True, own=None):
-    """Hinged leaf. own = item the leaf belongs to (wardrobe body), ignored by the robustness margin. Hinge (hx, hy) on the wall face of the opening side; d = closed-leaf direction,
+    """Hinged leaf. own = item the leaf belongs to (wardrobe body), ignored by the robustness margin.
+    Hinge (hx, hy) on the wall face of the opening side; d = closed-leaf direction,
     n = opening direction. Generates the leaf open at 90 degrees, the swept volume, handle and reveal checks."""
     frame = RULES["frame"] if frame is None else frame
     leaf_shape = rel_box(hx, hy, d, n, (-0.04, 0), (0, w), z0 + 0.01, hgt)
@@ -445,13 +459,13 @@ def verify(write_report=True, quiet=False):
         for sl in ST.SLIDES:
             if dd["sweep"].common(sl["shape"]).Volume > R["tol"] or dd["sweep"].common(sl["closed"]).Volume > R["tol"]:
                 hits.append("sliding " + sl["name"])
-        dd["mark"].ViewObject.ShapeColor = (0.9, 0.2, 0.2) if hits else (0.3, 0.8, 0.3)
+        _paint(dd["mark"], (0.9, 0.2, 0.2) if hits else (0.3, 0.8, 0.3))
         _r("Openings", dd["name"], "collisions: " + (", ".join(hits) if hits else "none"), "clear trajectory",
            NC if hits else VERIFIED, "blocking", "3D intersection of the volume swept by the leaf 0-90 degrees")
     for sl in ST.SLIDES:
         hits = hits_of(sl["shape"])
         hits += ["%s %s" % (d["kind"], d["name"]) for d in ST.DOORS if sl["shape"].common(d["sweep"]).Volume > R["tol"]]
-        sl["mark"].ViewObject.ShapeColor = (0.9, 0.2, 0.2) if hits else (0.3, 0.8, 0.3)
+        _paint(sl["mark"], (0.9, 0.2, 0.2) if hits else (0.3, 0.8, 0.3))
         _r("Openings", sl["name"] + " (open)", "collisions: " + (", ".join(hits) if hits else "none"),
            "clear travel", NC if hits else VERIFIED, "blocking", "3D intersection of the leaf in open position")
 
@@ -594,7 +608,7 @@ def verify(write_report=True, quiet=False):
 
     # 10a) wet zones: no electrical item next to an open shower side
     for lbl, zone in ST.WET:
-        h = [l for it, l, sh, _g in ST.CHECK if it in ST.ELEC and zone.BoundBox.intersect(sh.BoundBox)
+        h = [lb for it, lb, sh, _g in ST.CHECK if it in ST.ELEC and zone.BoundBox.intersect(sh.BoundBox)
              and zone.common(sh).Volume > R["tol"]]
         _r("Safety", lbl, ("electrical items inside: " + ", ".join(h)) if h else "no electrical item",
            "no electrical item in the splash zone", NC if h else VERIFIED, "blocking" if h else "",
@@ -797,8 +811,8 @@ def export():
     for o in solids:
         pts, tris = o.Shape.tessellate(5.0)
         g = o.getParentGroup().Label if o.getParentGroup() else "Other"
-        data.append({"name": o.Label, "group": g, "color": list(o.ViewObject.ShapeColor[:3]),
-                     "tr": o.ViewObject.Transparency,
+        data.append({"name": o.Label, "group": g, "color": list(o.IntColor[:3]) if hasattr(o, "IntColor") else [0.8, 0.8, 0.8],
+                     "tr": getattr(o, "IntTransparency", 0),
                      "v": [[round(p.x, 1), round(p.y, 1), round(p.z, 1)] for p in pts], "f": tris})
     json.dump(data, open(os.path.join(build, "mesh3d.json"), "w"))
 

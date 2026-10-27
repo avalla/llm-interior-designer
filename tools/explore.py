@@ -4,8 +4,9 @@
 #   GRID = {"table_x": [5.15, 5.35, 5.55], "table_y": [5.90, 6.10]}
 #   T = "/Users/andrea/dev/tmp/freecad/tools/explore.py"; exec(open(T).read(), {"PROJECT": PROJECT, "GRID": GRID})
 # The project reads its variable values from PARAMS (see projects/apartment-100sqm/project.py).
-# Ranking: fewest blocking, then significant problems, then improvement notes, then the largest smallest margin. The agent still chooses
-# and justifies: the ranking is a filter, not a verdict (docs/method.md, section 11: no score compensates a violation).
+# Ranking: fewest blocking, then significant problems, then improvement notes, then the largest smallest margin.
+# The agent still chooses and justifies: the ranking is a filter, not a verdict
+# (docs/method.md, section 11: no score compensates a violation).
 import itertools
 import os
 import re

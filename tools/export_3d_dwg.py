@@ -1,7 +1,9 @@
 # Builds a 3D DXF (coloured polyface meshes, one layer per group) readable by any AutoCAD,
 # including Mac and LT, which cannot import STEP.
 # Usage: uv run --with ezdxf python export_3d_dwg.py mesh3d.json Apartment_3D.dxf
-import json, sys
+import json
+import sys
+
 import ezdxf
 from ezdxf import colors
 from ezdxf.render import MeshBuilder

@@ -20,7 +20,7 @@ for name, aci in COLORS.items():
         doc.layers.add(name, color=aci)
 for e in msp:
     e.dxf.layer = mapping.get(e.dxf.layer, "FURNITURE")
-for lay in [l.dxf.name for l in doc.layers]:
+for lay in [layer.dxf.name for layer in doc.layers]:
     if lay not in COLORS and lay not in ("0", "Defpoints"):
         doc.layers.remove(lay)
 doc.header["$INSUNITS"] = 4  # mm

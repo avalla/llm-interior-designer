@@ -1,0 +1,12 @@
+line-length = 130
+extend-exclude = ["archive"]
+
+[lint]
+select = ["E", "F", "W"]
+
+[lint.per-file-ignores]
+# projects and fixtures use the engine's API through `from interiors import *` after a sys.path insert
+"projects/**/project.py" = ["E402", "F403", "F405", "E501"]   # coordinate data rows
+"evals/fixtures/**/project.py" = ["E402", "F403", "F405"]
+# scripts exec'd inside FreeCAD receive PROJECT/GRID from the caller's globals
+"tools/explore.py" = ["F821"]

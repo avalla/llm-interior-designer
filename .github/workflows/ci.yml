@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    name: Structure, scorer, lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Lint (ruff)
+        run: pipx run ruff check .
+      - name: Repository structure (skills, fixtures, Markdown links)
+        run: python ci/check_repo.py
+      - name: Review scorer unit test
+        run: python ci/test_score_review.py
+
+  engine:
+    name: Engine regression (headless FreeCAD)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: freecad
+          create-args: freecad>=1.0 python
+          init-shell: bash
+          cache-environment: true
+      - name: Run engine eval and example projects
+        run: |
+          FCCMD=$(command -v freecadcmd || command -v FreeCADCmd)
+          INTERIORS_ROOT="$PWD" "$FCCMD" ci/engine_ci.py
+      - name: Assert results
+        run: python ci/assert_engine.py
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine-eval
+          path: |
+            evals/results/engine.md
+            ci/engine_result.json
+          if-no-files-found: ignore
