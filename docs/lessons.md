@@ -86,3 +86,57 @@ collision because a plan draws chairs under the table; on the shifted-furniture 
 `STACKS`) and keep checking the rest; give hung items their height band instead of dropping them. Same family: a
 generated destination must sit on the route grid as the grid sees obstacles (square inflation), or the check reports
 the point, not the layout. Applied: `app/semantics/library.py`, `geometry()` in `app/core/interiors_core/checks.py`.
+
+**L23 - A living room is not a corridor.** In a semi-basement the bathroom and a bedroom opened onto the family room:
+every night trip to the WC (8.2 m) and every visit to that bedroom crossed the room where a guest sleeps on the sofa
+bed. The pre-mortem flagged it and the designer accepted it as a compromise; the user rejected it. Rule: bedrooms and
+the shared bathroom open onto circulation (hall, corridor, stair hall), never through a living, dining or family room;
+when the plan offers no corridor, carve one (1.00 m) before accepting the compromise, and state what it costs.
+Applied: `docs/method.md` par. 5, FMEA F22.
+
+**L24 - Size service rooms on their contents, not on the leftover.** A blind room that could not host a habitable room
+became a 31 m2 laundry while the family room next to it had 15.6 m2: the whole leftover went to a function that needs
+6-8 m2. Rule: size laundry, storage and plant rooms on what they hold; give the rest to the rooms that need it (or
+declare it as storage on its own), and compare service and habitable areas before closing the layout. Applied:
+`docs/method.md` par. 5, `docs/design-rules.md` (minimum areas), FMEA F23.
+
+**L25 - Look from where people sit and arrive, not only from the front door.** The WC was visible from the sofa through
+the open bathroom door, and from a stair arrival: `verify()` passed because `no_view` was declared only from the entrance
+of each floor (layout review). Rule: declare `no_view` for WC and beds also from the main seats (sofa, table) and from
+every stair arrival. Applied: `AGENTS.md` conventions, FMEA F10.
+
+**L26 - Zero problems is a gate, not the finish.** Three floors reached `TOTAL PROBLEMS: 0` with rooms furnished only with
+what a check needs (bed, wardrobe, sofa, TV, fixtures) and nothing of what the occupants need: an empty 3.3 m2 store, an
+empty 11.5 m2 stair hall, 27 m2 of empty floor in the laundry, half of the living room bare, no desk, no chest of
+drawers, no coat storage, a 3.1 m kitchen without wall units or pantry. The checks only see what is modelled, so a room
+with little in it passes everything. Rule: before furniture goes in, write the room's programme row (functions from
+brief par. 2-4: sleep, store N m, study, sit N, cook, eat N, dry, clean) and give every function an object; a room with
+no object, or only with check-driven objects, is a defect to report; floor occupancy has a lower bound to look at as
+well as the 40% upper bound. Applied: `furnishing` skill steps 2 and 4, method par. 4 and 7, FMEA F24.
+
+**L27 - Count the beds, the seats and the metres, and never bend the brief to the model.** The brief said two children in
+the semi-basement; the model gave them one double and one single bed, and the brief's "Sleep" row was then rewritten to
+match the model. Storage: 1.35 m of 45 cm wardrobe against 2.0 m of hanging asked; no linen, suitcase or coat storage
+anywhere. Rule: the brief holds a table occupant -> bed -> room, seats (living and dining) against occupants plus guests,
+and storage provided against required; each row is a `requirement()` linked to the objects that satisfy it; the brief
+is changed only with the user, and the change is logged. Applied: `project-onboarding` and `furnishing` skills, FMEA F13,
+F25.
+
+**L28 - A verdict may not rest on what is not drawn.** The pre-mortem triage closed stories with an under-stair closet
+that exists in neither the model nor the brief, with "pull-out rails", a "folding chair" and "specify sliding doors",
+and marked 16 of 37 stories "founded but accepted"; the user rejected the first one they read. Rule: a fix that is an
+object gets modelled before the verdict; a fix that is a specification becomes a `not_verifiable()` or a plan label;
+"founded but accepted" is a proposal to the user, who decides, never a verdict the designer gives on their behalf.
+Applied: `pre-mortem` skill step 3, FMEA F26.
+
+**L29 - An appliance zone is the open door plus the person.** Dishwasher, oven and fridge zones were drawn 70 cm deep
+from the closed unit's face; a 0.96 m aisle to an island passed every check while a dishwasher door down (60 cm) left
+36 cm to stand in (two reviewers found it: Codex review 09, pre-mortem S29). Rule: for drop-down and pull-out doors
+(dishwasher, oven, drawers) the `access_zone` depth is the door's projection plus 70 cm, measured from the unit's face
+(dishwasher 1.30, oven 1.20); for hinged doors (fridge, cabinets) the leaf is a `hinged()` and the zone stays 70 cm.
+Correction status (2026-10-29): `appliance_zone()` now includes the projection plus the person, and
+`projects/apartment-100sqm/project.py` uses it for the dishwasher and oven. The headless baseline run on that date
+reports zero blocking/significant failures for that example. The Japandi variant was also migrated to the helper in
+concurrent layout work, but its complete re-verification is separate. Remaining coverage gap: imported-plan semantics
+still generate generic 70 cm appliance zones. That path is not covered by the example correction.
+Applied: `docs/design-rules.md`, FMEA F18, `furnishing` skill step 2.

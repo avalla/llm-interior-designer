@@ -32,17 +32,39 @@ support a dimensional check.
 
 ## 3. Programme
 
-| Room / activity | Essential or desirable | Notes |
-|---|---|---|
-| | | |
+| Requirement id | Room / activity | Essential or desirable | Required quantity / acceptance criterion | Objects providing it | Check or manual evidence | Status |
+|---|---|---|---|---|---|---|
+| R01 | | | | | | open |
+
+Keep requirement ids stable. Register each as `requirement()` in the project, link the objects with `satisfied_by`
+and the relevant checks with `verified_by`, or identify the manual review evidence. An object link alone does not
+prove capacity. A missing object or unverified function stays open; do not change the requirement to fit the model.
+
+### Sleeping allocation
+
+| Requirement id | Occupant / guest scenario | Bed object | Room | Required / provided sleeping places | Source | Status |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+### Seating capacity
+
+| Requirement id | Living / dining / work | Everyday required / provided | With guests required / provided | Objects and deployed configuration | Evidence / source | Status |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+Check occupied seats and extended or folding furniture in the configuration used for the claimed capacity.
 
 ## 4. Storage
 
-| Category | Quantity (e.g. metres of hanging clothes, pairs of shoes, suitcases) |
-|---|---|
-| Long / short hanging clothes | |
-| Linen, shoes, suitcases | |
-| Cleaning, tools, supplies | |
+| Requirement id | Category | Required quantity and unit | Provided usable capacity | Objects / room | Evidence / source | Status |
+|---|---|---|---|---|---|---|
+| | Long / short hanging clothes | | | | | |
+| | Linen, shoes, suitcases | | | | | |
+| | Cleaning, tools, supplies | | | | | |
+| | Coats, pantry, bins | | | | | |
+
+Compare like units (hanging metres, shelf metres, pairs, volumes). External cabinet width alone does not prove usable
+hanging capacity; record internal dimensions and the chosen storage arrangement.
 
 ## 5. Style and products
 
@@ -72,5 +94,14 @@ support a dimensional check.
 
 ## Assumption log and open points
 
-| # | Assumption or missing data | Impact if wrong | Status (to confirm / confirmed) |
-|---|---|---|---|
+| # | Assumption or missing data | Source / evidence | Affected requirements and checks | Impact if wrong | Owner / confirmation needed by | Status (to confirm / confirmed) |
+|---|---|---|---|---|---|---|
+
+## Approved changes and compromises
+
+| Date | Requirement / finding id | Previous requirement or measured failure | Proposed change and consequences | Approved by / evidence | Follow-up verification |
+|---|---|---|---|---|---|
+
+Only record approval actually received from the user. Proposed compromises remain open until then. An accepted
+deviation remains visible with its measure, severity and reason; acceptance does not turn it into a passed check or
+override a statutory requirement. Keep failed or unverifiable blocking items explicit in any conditional proposal.

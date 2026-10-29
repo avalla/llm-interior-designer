@@ -36,8 +36,9 @@ Architecture, measures and progress for developers: `docs/desktop-app.md`. Build
 
 ## The checks
 
-Thresholds are those of `docs/design-rules.md`, the same as the FreeCAD engine of this repository (the app's core is
-tested for parity with it).
+Thresholds are catalogued in [design-rules.md](design-rules.md). The core is tested against FreeCAD on exported neutral
+models. Importing a drawing is a separate path: recognition, defaults and generated uses determine which checks can
+actually run. Passing core parity does not prove complete coverage of a DWG or DXF.
 
 | Check | What it measures | Rule |
 |---|---|---|
@@ -46,7 +47,7 @@ tested for parity with it).
 | Reveals | door frame too close to the perpendicular wall | ≥ 10 cm |
 | Seats | room behind a chair, from the table edge to the first obstacle | 75 cm to stand up, 90 cm to walk behind |
 | Clearances | kitchen aisle, island to tall units, bed sides, main passages | 90 (comfort 110), 80/90, 60/70, 80/90 cm |
-| Access zones | free floor in front of wardrobes, cabinets, appliances | 70 cm |
+| Access zones | free floor in front of wardrobes, cabinets, appliances | import currently generates 70 cm; appliance door projection is missing, so this does not verify use with the door open (L29) |
 | Routes | every destination (sofa, bed sides, WC, wardrobes...) reachable from the entrance | continuous 60 cm path, open doors as obstacles |
 | Privacy | shared rooms reached only through a bedroom; WC and bed seen from the entrance | route with private rooms blocked; sightline with doors open |
 | Light and air | daylight in habitable rooms, window or ventilation in bathrooms | glazing ≥ 1/8 of the floor (indicative) |
@@ -56,10 +57,41 @@ tested for parity with it).
 | Geometry | furniture inside a wall or inside another piece | no unintended overlap |
 | Assembly | a tall unit that cannot be tilted up in the room | diagonal ≤ room height − 2 cm |
 | Ergonomics | height between a surface and its seat | 25-32 cm |
+| Programme | room area, oversized laundry and empty service rooms | indicative area defaults and screening heuristics; see coverage below |
 
 Each result has a **status**: *non-compliant*, *verified*, *not verifiable* (the plan does not say enough, for example
-a bathroom without a window), and a **severity**: *blocking* (must be fixed), *significant* (should be fixed),
-*below comfort* (works, but tight). Each shows the measure, the threshold and the room.
+a bathroom without a window), or *not applicable*. Severity is separate: *blocking*, *significant*, or *improvement*
+(including below-comfort advice). The core can also preserve an *accepted* deviation recorded in a model; the import
+guide does not imply a UI approval workflow. Each result shows its measure, threshold and room where available.
+
+Zero reported problems is not a completeness certificate. Check recognition, assumptions, missing uses and the
+required/provided programme before interpreting the results. A result computed with assumed heights remains
+conditional on those heights; the engine does not automatically downgrade every such result to *not verifiable*.
+
+## Coverage and required inputs
+
+“Core” below means a neutral model with the required declarations. “Import” describes the current recognition and
+semantics path, not every possible drawing. Named tests are coverage evidence, not a claim that the current checkout
+passes them; current outcomes belong in [eval history](../evals/history.md).
+
+Programme screening and grouped viewpoints describe the local engine update under validation on 2026-10-29, not a
+capability guaranteed in the published installer. This documentation change ships separately from that engine work.
+
+| Control | Scripted FreeCAD / core | Imported plan | Required inputs and residual limit | Evidence |
+|---|---|---|---|---|
+| Door/sliding sweeps, handles, reveals | Registered opening geometry | Recognised door blocks | Hinge, swing, dimensions and defaults must be correct | `app/tests/parity.py`, `app/tests/import_e2e.py` |
+| Window-leaf collisions | Registered elevated sweep | Not generated | Window blocks/glazing alone do not describe moving leaves | Import fixture misses A5; `app/tests/import_mutants.py` |
+| Appliance open-door use | Explicit leaf or projection plus person zone; FreeCAD `appliance_zone()` | Generic 70 cm access only | Door type/projection and occupied use are not generated; manual review required | L29; `app/semantics/library.py` |
+| Seats, bed sides, storage access, routes | Explicit uses, destinations and entrance | Uses inferred from type/front and recognised rooms | Missing/incorrect type or front changes coverage; grid routing is not an accessibility assessment | `app/tests/import_e2e.py`, `app/tests/import_mutants.py` |
+| Private-room routes and room-entry screening | Registered private rooms, kinds and destinations | Recognised room kinds and generated destinations | Alternate routes, room naming and shared/private bathroom scope still require review | `app/tests/parity.py`; method L23 |
+| WC/bed sightlines | Explicit views; declared intimate objects and viewpoints | Entrance views generated | Main-seat and stair-arrival observer coverage is not equivalent to scripted declarations | L25; `app/semantics/library.py` |
+| Daylight, ergonomics, assembly, collisions at height | Modelled heights and geometry | Attributes where supported, otherwise defaults | Assumed sill/furniture heights can change verdicts; confirm data | `app/tests/import_e2e.py`; Assumptions tab |
+| Programme screening | Areas, laundry reference, object count, occupancy | Runs on recognised rooms and objects | 10% occupancy and 12 m2 laundry flags are heuristics; neither proves programme capacity | `app/core/interiors_core/checks.py`; rules DR21, DR35, DR37 |
+| Brief completeness and storage capacity | Explicit requirements plus manual evidence | No complete brief/capacity workflow | Count occupants, beds, seats and usable storage in the brief | [Brief template](brief-template.md), L26-L27 |
+| Safety splash zones | Declared wet zones and electrical items | Inferred from recognised types/sides | Type and geometry assumptions; no electrical-code compliance assessment | `app/tests/import_e2e.py`; L18 |
+
+The remaining geometric/comfort checks in the table above use the same core, subject to the same recognition and
+default-data limitations. Review a partly recognised drawing as partial evidence, even when its recognised subset passes.
 
 ## What the user sees and does
 
@@ -83,7 +115,11 @@ a bathroom without a window), and a **severity**: *blocking* (must be fixed), *s
 
 - Plans drawn with **loose lines and arcs** ("exploded": doors as arcs, furniture as outlines) are shown with a note
   but not checked: doors, windows and furniture must be blocks.
-- No heights from the drawing: sills, door and furniture heights are defaults (see *Assumptions*).
+- Heights are incomplete: supported opening attributes (`H`, `DAVANZALE`/`SILL`) are read; missing opening heights and
+  furniture heights use defaults (see *Assumptions*).
+- Appliance door projection is not added to imported access zones; review door-open use manually (L29).
+- Sightlines from all main seats and stair arrivals, required storage capacity and full brief coverage are not
+  automatically established by import.
 - Window leaves are not modelled, so a window leaf hitting furniture is not found.
 - No report export (PDF or annotated DXF) yet: the results are on screen.
 - No building services, structure, acoustics or local code compliance.

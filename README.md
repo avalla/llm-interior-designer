@@ -178,6 +178,8 @@ Blind reviews and pre-mortems need an AI agent and stay manual (skill `prompt-ev
 
 ## Structure
 
+Reading order, document authority and update rules: [documentation guide](docs/README.md).
+
 ```
 AGENTS.md                  instructions for the agent
 CLAUDE.md / GEMINI.md      point to AGENTS.md (Claude Code, Gemini CLI)

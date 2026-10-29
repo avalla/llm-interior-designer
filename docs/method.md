@@ -44,18 +44,23 @@ A 3D model is not a check: it becomes one once `verify()` has measured it.
 
 ## 4. Phases
 
-Each phase ends with `verify()` at zero problems and a look at the screenshots. Later phases **add**: moving geometry from
-a closed phase reopens it.
+Each phase closes against its own evidence below, with a review of the available drawings. Run `verify()` whenever a
+model exists, but record which objects, uses and requirements it covers. Brief and survey phases cannot demonstrate
+furniture usability. Later phases **add**: moving geometry from a closed phase reopens the affected checks.
+
+`TOTAL PROBLEMS: 0` counts only NON-COMPLIANT results of blocking or significant severity. It does not count missing
+registrations, NOT VERIFIABLE results, accepted deviations or improvement notes. Always report those separately,
+alongside programme completeness. Do not add objects merely to meet an occupancy target.
 
 | Phase | Content | Done when |
 |---|---|---|
-| 0. Brief | `brief.md` filled in, requirements with ids (`R01`...), assumption log, baseline review | every blocking item has a value or a declared assumption |
-| 1. Survey | walls, openings, fixed services, rooms, entrance | model dimensions match the source |
+| 0. Brief | `brief.md` filled in, requirements with ids (`R01`...), assumption log, baseline review | needs and allowed changes agreed; blocking unknowns identified with owner and affected work; dependent work remains conditional |
+| 1. Survey | walls, openings, fixed services, rooms, entrance | model dimensions match identified sources; unresolved dimensions are marked assumed and dependent checks remain conditional |
 | 2. Layout | relationships between rooms; 2-3 options when the problem warrants it, discarding those that break constraints; `tools/explore.py` for placements worth comparing | choice justified |
-| 3. Main furniture | beds, sofas, tables, kitchen, wardrobes, fixtures, with their uses registered | checks at zero |
-| 4. Details | rugs, lamps, plants, wall items | checks at zero, nothing from phase 3 moved |
-| 5. Review | top and isometric screenshots, scenarios, antipatterns, patterns (`patterns.md`); then a `pre-mortem` by a fresh reviewer | every pre-mortem story has a verdict |
-| 6. Delivery | export, report, furniture schedule | `round-trip OK` and no blocking items in the report |
+| 3. Main furniture | programme row per room (functions from the brief -> objects), then beds, sofas, tables, kitchen, wardrobes, fixtures, with their uses registered | no unresolved blocking/significant failures in applicable checks; required capacity and every room function evidenced (L26, L27); assumptions and user-approved deviations listed |
+| 4. Details | rugs, lamps, plants, wall items | affected checks rerun; no new unresolved blocking/significant failures; phase 3 evidence still valid |
+| 5. Review | top and isometric screenshots, scenarios, antipatterns, patterns (`patterns.md`); then a `pre-mortem` by a fresh reviewer | every story has an evidenced verdict; modelled fixes rechecked; proposed compromises require the user's decision |
+| 6. Delivery | export, report, furniture schedule | `round-trip OK`; programme coverage and open/accepted/unverifiable items disclosed; unresolved blocking items permit only a clearly conditional proposal |
 
 After every change, recheck what is connected: moving a wardrobe can fix one collision and create another.
 
@@ -67,6 +72,10 @@ tolerance analysis (Robustness), failure modes ranked in [`fmea.md`](fmea.md), n
 
 - Sleep is protected from entrance, TV, kitchen, laundry, plant rooms.
 - No bedroom is a through route; the shared bathroom is not reachable only through a bedroom.
+- No living, dining or family room is a through route either: bedrooms and the shared bathroom open onto a hall, corridor
+  or stair hall. With no corridor in the plan, carve one (1.00 m) before accepting the compromise (L23).
+- Service rooms (laundry, storage, plant) are sized on what they hold, not on the space left over; leftover area goes to
+  the rooms that need it or is declared as storage on its own (L24).
 - Beds and WCs are not visible from the entrance.
 - Guests use the living area and a bathroom without crossing the private zone (with a single bathroom, state the compromise).
 - Kitchen, table, pantry and bins are close; shopping, laundry and cleaning have practical routes.
@@ -84,6 +93,11 @@ tolerance analysis (Robustness), failure modes ranked in [`fmea.md`](fmea.md), n
 
 ## 7. Checks per room
 
+**Programme, in every room.** Who uses it and for what (brief par. 2-4), and one object per function: a bed per
+occupant, a seat per occupant plus guests, hanging and shelf metres as asked, a place for coats, shoes, linen, suitcases,
+cleaning, bins. An empty room, a bare half of a room or a room holding only what a check needs is a defect, not a
+clean result; the brief is never rewritten to match the model (L26, L27).
+
 **Night zone.** Bed reachable from the sides in use (double bed: both); bed, nightstands, door and open wardrobe coexist;
 headboard not under a window without checking opening and comfort; blackout and independent reading lights; wardrobes
 sized on real contents; noise from drains and services on shared walls.
@@ -97,7 +111,8 @@ not the space to walk behind a seated person).
 seats, not above/in front of/next to a window on the same wall, not above a fireplace without a check; workstation out of
 the circulation, with glare-free light and space behind the chair.
 
-**Bathrooms and laundry.** Use of washbasin, WC, bidet, shower; door, shower enclosure and units without interference;
+**Bathrooms and laundry.** In Italy a bathroom has a bidet beside the WC (axes 80 cm apart): every bedroom bathroom
+gets one, and a guest WC without it is declared, never silently omitted. Use of washbasin, WC, bidet, shower; door, shower enclosure and units without interference;
 door swing chosen for use, not for the drawing; fixtures moved only with drains and falls checked; open washer doors,
 appliance removal, ventilation.
 
@@ -146,7 +161,9 @@ separate categories: passing one does not prove the others.
 
 Every check has a status: **VERIFIED** (with measure and method), **NON-COMPLIANT** (requirement, impact, fix),
 **NOT VERIFIABLE** (missing data or tool), **NOT APPLICABLE** (reason); and a severity: **blocking**, **significant**,
-**improvement**. With failed or unverifiable blocking checks the solution is delivered only as a conditional proposal.
+**improvement**. Where the engine records **ACCEPTED**, retain the original measure, threshold and severity, plus the
+user's name, date and reason. Acceptance records a deviation, never proof of compliance; the designer cannot approve
+it for the user. With failed or unverifiable blocking checks the solution is delivered only as a conditional proposal.
 No average score compensates a blocking violation.
 
 Before delivery, actively look for defects: in every room one must be able to enter, move, use the furniture, open the
