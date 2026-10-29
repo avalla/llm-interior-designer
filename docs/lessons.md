@@ -73,3 +73,9 @@ delivery, and its founded stories feed lessons, FMEA and checks. Applied: `furni
 
 **L20 - Say what "depth" means.** A 60 cm wide fridge zone was read as 60 cm deep (shorter side). Rule: `access_zone(...,
 depth=)` when the zone is narrower than it is deep. Applied: `access_zone()`.
+
+**L21 - A boolean that returns nothing is not "no collision".** FreeCAD's `common()` between a shape and a compound of
+touching solids (bookcase, chairs) returns an empty shape: a bookcase pushed 20 cm into a partition and into the open
+night-zone sliding door gave 0 cm3 instead of 54000 and 3068. Found by the 2.5D port's parity run on shifted furniture
+(`app/tests/parity.py`). Rule: intersect solid by solid; test checks on deliberately broken layouts, not only on clean
+ones. Applied: `_common()` / `_vol()` in `lib/interiors.py`; mutants in `app/tools/export_model.py`.

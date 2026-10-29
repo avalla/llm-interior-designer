@@ -184,7 +184,8 @@ def hinged(name, hx, hy, d, n, w, kind="Door", color=None, hgt=2.10, z0=0.0, lea
         hnd = rel_box(hx, hy, d, n, (-0.04 - m_, -0.04), (w - 0.12, w - 0.04), 0.95, 1.10)
         probe = rel_box(hx, hy, d, n, (-frame - RULES["reveal"] + 0.005, -frame), (0.005, 0.10), 0.10, 2.0)
     ST.DOORS.append(dict(name=name, sweep=sweep, mark=m, kind=kind, handle=hnd, probe=probe, own=own,
-                         leaf=leaf_shape if (leaf and z0 < 0.5) else None))
+                         leaf=leaf_shape if (leaf and z0 < 0.5) else None,
+                         geo=dict(hinge=[hx, hy], d=list(d), n=list(n), w=w, z0=z0, hgt=hgt)))
 
 
 def sliding(name, closed, opened, color=None):
@@ -340,17 +341,27 @@ def _r(cat, elem, measure, threshold, status, sev, method, note_=""):
                            sev=sev, method=method, note=note_))
 
 
+def _common(a, b):
+    """Intersections solid by solid: common() between a shape and a compound of touching or overlapping solids
+    (bookcase, chair) returns an empty result in FreeCAD 1.1 (lesson L21)."""
+    return [x.common(y) for x in (a.Solids or [a]) for y in (b.Solids or [b]) if x.BoundBox.intersect(y.BoundBox)]
+
+
+def _vol(a, b):
+    return sum(c.Volume for c in _common(a, b))
+
+
 def hits_of(shape, skip_items=(), walls=True):
     out = []
     for item, lbl, sh, _g in ST.CHECK:
         if item in skip_items or not shape.BoundBox.intersect(sh.BoundBox):
             continue
-        v = shape.common(sh).Volume
+        v = _vol(shape, sh)
         if v > RULES["tol"]:
             out.append("%s (%.0f cm3)" % (lbl, v / 1000))
     if walls:
         for wname, ws in ST.WALLS:
-            if shape.BoundBox.intersect(ws.BoundBox) and shape.common(ws).Volume > RULES["tol"]:
+            if shape.BoundBox.intersect(ws.BoundBox) and _vol(shape, ws) > RULES["tol"]:
                 out.append("WALL " + wname)
     return out
 
@@ -454,17 +465,17 @@ def verify(write_report=True, quiet=False):
         hits = hits_of(dd["sweep"])
         for o in ST.DOORS:
             if o["name"] != dd["name"] and dd["sweep"].BoundBox.intersect(o["sweep"].BoundBox) \
-                    and dd["sweep"].common(o["sweep"]).Volume > R["tol"]:
+                    and _vol(dd["sweep"], o["sweep"]) > R["tol"]:
                 hits.append("%s %s" % (o["kind"], o["name"]))
         for sl in ST.SLIDES:
-            if dd["sweep"].common(sl["shape"]).Volume > R["tol"] or dd["sweep"].common(sl["closed"]).Volume > R["tol"]:
+            if _vol(dd["sweep"], sl["shape"]) > R["tol"] or _vol(dd["sweep"], sl["closed"]) > R["tol"]:
                 hits.append("sliding " + sl["name"])
         _paint(dd["mark"], (0.9, 0.2, 0.2) if hits else (0.3, 0.8, 0.3))
         _r("Openings", dd["name"], "collisions: " + (", ".join(hits) if hits else "none"), "clear trajectory",
            NC if hits else VERIFIED, "blocking", "3D intersection of the volume swept by the leaf 0-90 degrees")
     for sl in ST.SLIDES:
         hits = hits_of(sl["shape"])
-        hits += ["%s %s" % (d["kind"], d["name"]) for d in ST.DOORS if sl["shape"].common(d["sweep"]).Volume > R["tol"]]
+        hits += ["%s %s" % (d["kind"], d["name"]) for d in ST.DOORS if _vol(sl["shape"], d["sweep"]) > R["tol"]]
         _paint(sl["mark"], (0.9, 0.2, 0.2) if hits else (0.3, 0.8, 0.3))
         _r("Openings", sl["name"] + " (open)", "collisions: " + (", ".join(hits) if hits else "none"),
            "clear travel", NC if hits else VERIFIED, "blocking", "3D intersection of the leaf in open position")
@@ -487,9 +498,9 @@ def verify(write_report=True, quiet=False):
         for it, _l, sh, _g in ST.CHECK + [(w, w, s, "") for w, s in ST.WALLS]:
             if it in own or not zone.BoundBox.intersect(sh.BoundBox):
                 continue
-            c = zone.common(sh)
-            if c.Volume > R["tol"]:
-                free = min(free, min((v.Point.x / S - ox) * dx + (v.Point.y / S - oy) * dy for v in c.Vertexes))
+            cs = _common(zone, sh)
+            if sum(c.Volume for c in cs) > R["tol"]:
+                free = min([free] + [(v.Point.x / S - ox) * dx + (v.Point.y / S - oy) * dy for c in cs for v in c.Vertexes])
         ok = free >= R["seat_min"]
         _r("Seats", name, "%.0f cm" % (free * 100),
            "min %.0f (stand up) / comfort %.0f (walk behind)" % (R["seat_min"] * 100, R["seat_comfort"] * 100),
@@ -501,7 +512,7 @@ def verify(write_report=True, quiet=False):
     for lbl, a, b, mn, cf in ST.CLEAR:
         d = ST.doc.getObject(a).Shape.distToShape(ST.doc.getObject(b).Shape)[0] / S
         ok = d >= mn - 1e-6
-        low = cf and d < cf
+        low = cf and d < cf - 1e-6           # same tolerance as the minimum: a measure equal to comfort meets it
         _r("Clearances", lbl, "%.0f cm" % (d * 100), "min %.0f" % (mn * 100) + (" / comfort %.0f" % (cf * 100) if cf else ""),
            VERIFIED if ok else NC, "blocking" if not ok else ("improvement" if low else ""),
            "minimum plan distance %s - %s" % (a, b), "below comfort target" if ok and low else "")
@@ -609,7 +620,7 @@ def verify(write_report=True, quiet=False):
     # 10a) wet zones: no electrical item next to an open shower side
     for lbl, zone in ST.WET:
         h = [lb for it, lb, sh, _g in ST.CHECK if it in ST.ELEC and zone.BoundBox.intersect(sh.BoundBox)
-             and zone.common(sh).Volume > R["tol"]]
+             and _vol(zone, sh) > R["tol"]]
         _r("Safety", lbl, ("electrical items inside: " + ", ".join(h)) if h else "no electrical item",
            "no electrical item in the splash zone", NC if h else VERIFIED, "blocking" if h else "",
            "3D intersection of the splash zone with items declared electrical()")
@@ -669,11 +680,11 @@ def verify(write_report=True, quiet=False):
     for i in range(len(C_)):
         for j in range(i + 1, len(C_)):
             a, b = C_[i], C_[j]
-            if a[0] != b[0] and a[2].BoundBox.intersect(b[2].BoundBox) and a[2].common(b[2]).Volume > R["tol"]:
+            if a[0] != b[0] and a[2].BoundBox.intersect(b[2].BoundBox) and _vol(a[2], b[2]) > R["tol"]:
                 pairs.append("%s <-> %s" % (a[1], b[1]))
     for _item, lbl, sh, _g in C_:
         for wname, ws in ST.WALLS:
-            if sh.BoundBox.intersect(ws.BoundBox) and sh.common(ws).Volume > R["tol"]:
+            if sh.BoundBox.intersect(ws.BoundBox) and _vol(sh, ws) > R["tol"]:
                 pairs.append("%s inside %s" % (lbl, wname))
     _r("Geometry", "Furniture/wall interpenetrations", ", ".join(pairs) if pairs else "none", "none",
        NC if pairs else VERIFIED, "blocking" if pairs else "", "pairwise 3D intersection")
