@@ -27,6 +27,8 @@ Reusable base for designing and checking furnishing layouts (apartments, villas,
 | `docs/lessons.md` | lessons learned `Lnn`, to reread before designing and to extend afterwards |
 | `docs/patterns.md` | pattern language `Pnn` (Alexander + project patterns), used as leading words |
 | `docs/fmea.md` | failure modes with severity/occurrence/detection: what to check first, what to automate next |
+| `docs/desktop-app.md` | architecture and progress of the desktop app for architects (DWG import, 2.5D engine core, Tauri) |
+| `app/` | desktop app work: `core/interiors_core` (checks without FreeCAD, parity-tested), `importer/` (DXF/DWG recognition), `semantics/` (furniture type -> uses), `tools/export_model.py`, `tests/` |
 | `evals/` | fixtures with planted defects, engine eval and review scoring (`prompt-evals` skill) |
 | `archive/` | previous (Italian) versions, read-only |
 

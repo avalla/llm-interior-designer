@@ -79,3 +79,10 @@ touching solids (bookcase, chairs) returns an empty shape: a bookcase pushed 20 
 night-zone sliding door gave 0 cm3 instead of 54000 and 3068. Found by the 2.5D port's parity run on shifted furniture
 (`app/tests/parity.py`). Rule: intersect solid by solid; test checks on deliberately broken layouts, not only on clean
 ones. Applied: `_common()` / `_vol()` in `lib/interiors.py`; mutants in `app/tools/export_model.py`.
+
+**L22 - Do not switch a check off to silence a drawing convention.** The 2D import skipped every furniture/furniture
+collision because a plan draws chairs under the table; on the shifted-furniture mutants that hid 12 real collisions
+(armchair into the floor lamp, hung items into walls). Rule: list the overlaps that are drawn on purpose (type pairs,
+`STACKS`) and keep checking the rest; give hung items their height band instead of dropping them. Same family: a
+generated destination must sit on the route grid as the grid sees obstacles (square inflation), or the check reports
+the point, not the layout. Applied: `app/semantics/library.py`, `geometry()` in `app/core/interiors_core/checks.py`.

@@ -44,7 +44,7 @@ for exp in sorted(glob.glob("evals/fixtures/*/expected.json")):
         errors.append("%s: %s" % (exp, exc))
 
 for md in glob.glob("**/*.md", recursive=True):
-    if md.startswith(("archive/", "evals/results/")) or "/output/" in md:
+    if md.startswith(("archive/", "evals/results/")) or "/output/" in md or "/node_modules/" in md or "/target/" in md:
         continue
     for target in re.findall(r"\]\(([^)#\s]+)\)", open(md).read()):
         if re.match(r"[a-z]+://", target) or target.startswith("mailto:"):

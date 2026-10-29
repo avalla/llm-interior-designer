@@ -1,0 +1,11 @@
+{
+ "layers": {"0-M30": "walls"},
+ "front": "-y",
+ "blocks": {
+  "AR*": "wardrobe", "BA*": "base unit", "CO*": "nightstand", "DE*": "decor", "DI*": "sofa", "DO*": "shower",
+  "EL*": "appliance", "IN*": "built-in", "IS*": "island", "LA*": "lamp", "LE*": "bed", "LI*": "bookcase",
+  "LU*": "table lamp", "MO*": "cabinet", "MT*": "tv unit", "PE*": "wall unit", "PO*": "armchair", "SA*": "sanitary",
+  "SE*": "chair", "SO*": "hung", "SP*": "mirror", "TA*": "table", "TB*": "coffee table", "TE*": "heater",
+  "VE*": "shower screen", "VS*": "wc"
+ }
+}

@@ -4,6 +4,8 @@ evals/fixtures/*/output/
 evals/results/
 ci/engine_result.json
 build/
+/dist/
+*.spec
 # loose CAD exports (e.g. archive/)
 *.FCStd
 *.FCBak

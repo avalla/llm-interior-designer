@@ -163,10 +163,13 @@ uv run --with ezdxf python tools/read_plan.py projects/<name>/input/plan.dwg
 | Job | What it checks |
 |---|---|
 | Structure, scorer, lint | `ruff`; skills follow the Agent Skills format; `.claude/skills` symlink; eval fixtures well formed; Markdown links; unit test of `evals/score_review.py` |
-| Engine regression | headless FreeCAD (conda-forge): every planted defect in `evals/fixtures` detected, no unexpected NON-COMPLIANT result, every project in `projects/` at 0 problems |
+| Engine regression | headless FreeCAD 1.1.3 (conda-forge, pinned; 1.1.4 is not packaged there): every planted defect in `evals/fixtures` detected, no unexpected NON-COMPLIANT result, every project in `projects/` at 0 problems; app core parity with the FreeCAD engine on projects, fixtures and shifted-furniture mutants (`app/tests/parity.py`); plan import end to end on studio-style DXF drawings (`app/tests/import_e2e.py`, `app/tests/import_mutants.py`) |
 
 Run the same locally: `python3 ci/check_repo.py`, `python3 ci/test_score_review.py`, `uvx ruff check .`, and
-`INTERIORS_ROOT=$PWD /Applications/FreeCAD.app/Contents/Resources/bin/freecadcmd ci/engine_ci.py && python3 ci/assert_engine.py`.
+`INTERIORS_ROOT=$PWD /Applications/FreeCAD.app/Contents/Resources/bin/freecadcmd ci/engine_ci.py && python3 ci/assert_engine.py`;
+for the app core, `MUTANTS=1 INTERIORS_ROOT=$PWD .../freecadcmd app/tools/export_model.py` then
+`uv run --with shapely python app/tests/parity.py`, `uv run --with ezdxf --with shapely python app/tests/import_e2e.py` and
+`app/tests/import_mutants.py` (same command) (desktop app work in progress: `docs/desktop-app.md`).
 Blind reviews and pre-mortems need an AI agent and stay manual (skill `prompt-evals`).
 
 ## Structure

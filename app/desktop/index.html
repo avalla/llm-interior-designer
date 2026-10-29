@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <title>Interior Check</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+  <body>
+    <header>
+      <strong class="brand">Interior Check</strong>
+      <button id="open" class="primary">Open plan…</button>
+      <span id="file" class="muted">no plan open</span>
+      <span class="spacer"></span>
+      <span id="summary"></span>
+      <button id="load-profile" title="Studio profile: layer, block and front mappings">Load profile…</button>
+      <button id="save-profile" disabled>Save profile…</button>
+      <button id="rerun" disabled>Re-analyse</button>
+    </header>
+    <main>
+      <section id="plan-wrap">
+        <svg id="plan" aria-label="Plan"></svg>
+        <div id="banner"></div>
+        <div id="layers" class="card"></div>
+        <div id="empty" class="empty">
+          <p>Open a DXF (or a DWG, with the ODA File Converter installed) to check it.</p>
+          <p class="muted">Nothing leaves this computer.</p>
+        </div>
+      </section>
+      <aside>
+        <nav id="tabs">
+          <button data-tab="results" class="active">Results</button>
+          <button data-tab="mapping">Mapping <span id="confirm-count" class="pill"></span></button>
+          <button data-tab="assumptions">Assumptions</button>
+        </nav>
+        <div id="panel"></div>
+      </aside>
+    </main>
+    <footer id="status" class="muted">ready</footer>
+  </body>
+</html>
