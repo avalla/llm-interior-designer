@@ -1,7 +1,8 @@
 # Interior Check (desktop shell)
 
 Tauri v2 window + TypeScript UI around the Python sidecar (`app/sidecar/server.py`), which does the work: plan
-recognition, furniture semantics, checks. Architecture and decisions: `docs/desktop-app.md` (D6).
+recognition, furniture semantics, checks. What the app does, for its users: `docs/interior-check.md`. Architecture and decisions: `docs/desktop-app.md`
+(D6).
 
 ## Run in development
 

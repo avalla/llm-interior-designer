@@ -39,6 +39,10 @@ licensed professionals. Every project's report explicitly lists what could not b
 
 - **Delivery**: 2D plan DWG with dimensions, layers and areas; 3D DWG that also opens in AutoCAD LT and Mac; STEP solids;
   PNG preview; `verification_report.md` with checks, rooms, rough openings and furniture schedule.
+- **Interior Check, desktop app** (no FreeCAD, no agent): opens an architect's DXF/DWG furnishing plan, recognises
+  walls, rooms, doors, windows and furniture blocks, and runs the same checks on it. What it does and does not do:
+  [`docs/interior-check.md`](docs/interior-check.md); Windows installer in the
+  [releases](https://github.com/avalla/llm-interior-designer/releases).
 
 ## Requirements
 
@@ -187,6 +191,9 @@ docs/
   lessons.md               lessons learned (L01, L02, ...)
   patterns.md              pattern language (P01, P02, ...)
   fmea.md                  failure modes ranked by risk
+  interior-check.md        the desktop app: what it reads, recognises and checks, its limits
+  desktop-app.md           the desktop app: architecture, decisions, progress
+app/                       desktop app: core checks, DXF/DWG importer, furniture semantics, sidecar, Tauri shell
 evals/                     fixtures with planted defects, engine eval, review scoring, history
 ci/                        CI scripts (repository checks, scorer test, headless engine run)
 .github/workflows/ci.yml   CI pipeline

@@ -16,4 +16,5 @@ To see it first on a plan with planted mistakes, press **Try the example** on th
 the help: how a plan should be drawn, what each check measures and its rule, the plan legend. A plan can also be
 dragged onto the window.
 
-Architecture, measures and limits: `docs/desktop-app.md`.
+What the app reads, checks and does not do yet:
+[docs/interior-check.md](https://github.com/avalla/llm-interior-designer/blob/main/docs/interior-check.md).
