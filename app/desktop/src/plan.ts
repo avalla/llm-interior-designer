@@ -29,6 +29,7 @@ export class PlanView {
   private view: { x: number; y: number; w: number; h: number } = { x: 0, y: 0, w: 10, h: 10 };
   private groups = {} as Record<Layer | "base" | "labels" | "hl", SVGGElement>;
   private hidden = new Set<Layer>();
+  private sceneBounds: Bounds | null = null;
 
   constructor(private svg: SVGSVGElement) {
     this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
@@ -82,7 +83,13 @@ export class PlanView {
     }
     if (scene.start) el("circle", { cx: scene.start[0], cy: scene.start[1], r: 0.12, class: "start" }, g.destinations);
     for (const l of this.hidden) g[l].style.display = "none";
-    if (scene.bounds) this.fit(scene.bounds, 0.6);
+    this.sceneBounds = scene.bounds;
+    this.fitAll();
+  }
+
+  /** The whole plan in view (F key, Fit button). */
+  fitAll() {
+    if (this.sceneBounds) this.fit(this.sceneBounds, 0.6);
   }
 
   /** Lights the lines of one drawing layer (mapping table hover); null switches it off. */

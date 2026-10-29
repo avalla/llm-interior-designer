@@ -34,6 +34,11 @@ if "error" not in ask(2, "no_such_method"):
     fail.append("unknown method did not return an error")
 if "error" not in ask(3, "analyse", dict(path=os.path.join(SAMPLES, "missing.dxf"))):
     fail.append("missing file did not return an error")
+demo = ask(4, "demo")["result"]["path"]                         # the example of the welcome screen, bundled
+demo_r = ask(5, "analyse", dict(path=demo))["result"] if os.path.isfile(demo) else {}
+if not demo_r.get("checkable") or not demo_r.get("summary", {}).get("NON-COMPLIANT"):
+    fail.append("demo plan %s missing or not checkable with planted mistakes" % demo)
+print("demo plan: %s, %s" % (os.path.basename(demo), demo_r.get("summary")))
 if not os.path.isfile(os.path.join(SAMPLES, "b-judgement-codes.dxf")):
     # no FreeCAD models here (the Windows packaging job): one room drawn on the spot, checked end to end
     import ezdxf

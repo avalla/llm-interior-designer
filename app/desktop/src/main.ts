@@ -1,7 +1,8 @@
 // Interior Check: open a plan, confirm the mapping (layers, blocks, units, front convention), read the results on the
 // plan. Every correction goes into the studio profile, which the next drawing of the studio starts from.
+import { GLOSSARY, helpHtml, legendHtml } from "./help";
 import { PlanView, LAYERS } from "./plan";
-import { pickFile, rpc } from "./rpc";
+import { inTauri, pickFile, rpc } from "./rpc";
 import type { Analysis, Profile, Row, Vocabulary } from "./types";
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -91,10 +92,13 @@ function renderPanel() {
 function rowHtml(r: Row, i: number) {
   const cls = r.status === "NON-COMPLIANT" ? r.sev || "blocking" : r.sev === "improvement" ? "improvement" :
     r.status === "VERIFIED" ? "verified" : "significant";
-  return `<div class="row ${cls}${i === state.selected ? " selected" : ""}" data-row="${i}">
-    <div class="what">${esc(r.cat)} · ${esc(r.elem)}</div>
+  const sel = i === state.selected, g = GLOSSARY[r.cat];
+  return `<div class="row ${cls}${sel ? " selected" : ""}" data-row="${i}">
+    <div class="what">${esc(r.cat)} · ${esc(r.elem)}${g ? `<span class="q" data-help="${esc(r.cat)}" title="What does this check mean?">?</span>` : ""}</div>
     <div>${esc(r.measure)} <span class="muted">(${esc(r.threshold)})</span></div>
-    <div class="meta">${[r.room, r.sev, r.note].filter(Boolean).map(esc).join(" · ")}</div></div>`;
+    <div class="meta">${[r.room, r.sev, r.note].filter(Boolean).map(esc).join(" · ")}</div>
+    ${sel ? `<div class="explain">${g ? esc(g.what) + "<br>" : ""}<span class="muted">Measured: ${esc(r.method)}</span>
+      ${r.where.bounds ? "" : '<br><span class="muted">This result has no single place on the plan.</span>'}</div>` : ""}</div>`;
 }
 
 function resultsHtml(a: Analysis) {
@@ -108,7 +112,9 @@ function resultsHtml(a: Analysis) {
   const better = rows.filter(([r]) => r.status === "VERIFIED" && r.sev === "improvement");
   const ok = rows.filter(([r]) => r.status === "VERIFIED" && r.sev !== "improvement");
   const list = (xs: typeof rows) => xs.map(([r, i]) => rowHtml(r, i)).join("");
-  return `<h3>Non-compliant (${bad.length})</h3>${list(bad) || '<p class="muted">None.</p>'}
+  const intro = bad.length ? '<p class="muted small">Click a result to see it on the plan; <b>?</b> explains the check.</p>'
+    : `<p class="ok-msg">No issues found in ${a.results.length} checks.</p>`;
+  return `${intro}<h3>Non-compliant (${bad.length})</h3>${list(bad) || '<p class="muted">None.</p>'}
     ${notv.length ? `<h3>Not verifiable (${notv.length})</h3>${list(notv)}` : ""}
     ${better.length ? `<h3>Below comfort (${better.length})</h3>${list(better)}` : ""}
     <details><summary>Verified (${ok.length})</summary>${list(ok)}</details>`;
@@ -157,8 +163,11 @@ function mappingHtml(a: Analysis) {
         <td>${conf(f.confidence)}</td><td class="why">${esc(f.why)}</td></tr>`).join("");
   const fronts = m.fronts.filter((f) => f.confidence < 0.7).map((f) =>
     `<tr><td>${esc(f.item)}</td><td>${esc(f.side)}</td><td>${conf(f.confidence)}</td><td class="why">${esc(f.why)}</td></tr>`).join("");
-  return `<p class="muted">Corrections go into the studio profile; press <b>Re-analyse</b>, then <b>Save profile</b> so the
-    next drawing of the studio starts from them.</p>
+  const todo = m.confirm.length ? `<p class="todo"><b>${m.confirm.length} choices to confirm</b> (confidence below 0.7,
+      in red or orange below). Change what is wrong, press <b>Re-analyse</b>, then <b>Save profile</b>.</p>`
+    : '<p class="ok-msg">Everything was read with good confidence.</p>';
+  return `${todo}<p class="muted small">Hover a layer to see its lines on the plan. Corrections go into the studio profile, so
+    the next plan of the studio is read correctly at once.</p>
     <h3>Units</h3><p>1 drawing unit = ${a.units.factor} m <span class="why">(${esc(a.units.note)})</span><br>
       Override: ${select("units", "units", pr.units ?? "auto", units)}</p>
     <h3>Layers</h3><table><tr><th>Layer</th><th>Category</th><th>Conf.</th><th>Evidence</th></tr>${layers}</table>
@@ -200,6 +209,47 @@ async function openPlan(path?: string | null) {
 }
 
 $("#open").addEventListener("click", () => openPlan());
+$("#open-2").addEventListener("click", () => openPlan());
+$("#demo").addEventListener("click", async () => {
+  try {
+    await openPlan((await rpc<{ path: string }>("demo")).path);
+  } catch (e) { status(String(e), true); }
+});
+$("#fit").addEventListener("click", () => plan.fitAll());
+$("#legend-toggle").addEventListener("click", () => $("#legend").classList.toggle("shown"));
+
+// ---------- help ----------
+function openHelp(focus?: string) {
+  const d = $("#help-drawer");
+  $("#help-body").innerHTML = helpHtml(focus);
+  d.hidden = false;
+  const target = focus && document.getElementById("help-" + focus.replace(/\s/g, "-"));
+  if (target) target.scrollIntoView({ block: "center" });
+}
+const closeHelp = () => { $("#help-drawer").hidden = true; };
+$("#help").addEventListener("click", () => ($("#help-drawer").hidden ? openHelp() : closeHelp()));
+$("#help-2").addEventListener("click", () => openHelp());
+$("#help-close").addEventListener("click", closeHelp);
+document.addEventListener("keydown", (e) => {
+  if ((e.target as HTMLElement).closest("select, input, textarea")) return;
+  if (e.key === "F1" || e.key === "?") { e.preventDefault(); openHelp(); }
+  else if (e.key === "Escape") closeHelp();
+  else if (e.key === "f" || e.key === "F") plan.fitAll();
+});
+
+// ---------- drag and drop (desktop app: the webview reports the dropped paths) ----------
+if (inTauri) {
+  import("@tauri-apps/api/webview").then(({ getCurrentWebview }) =>
+    getCurrentWebview().onDragDropEvent((ev) => {
+      const drop = $("#drop"), p = ev.payload;
+      if (p.type === "enter" || p.type === "over") drop.classList.add("shown");
+      else drop.classList.remove("shown");
+      if (p.type === "drop") {
+        const plan = p.paths.find((x) => /\.(dxf|dwg)$/i.test(x));
+        plan ? openPlan(plan) : status("drop a .dxf or .dwg file", true);
+      }
+    }));
+}
 $("#rerun").addEventListener("click", analyse);
 $("#load-profile").addEventListener("click", async () => {
   const path = await pickFile("profile");
@@ -231,13 +281,17 @@ $("#panel").addEventListener("mouseover", (e) =>          // hovering a layer li
   plan.lightLayer((e.target as HTMLElement).closest<HTMLElement>("[data-layer-row]")?.dataset.layerRow ?? null));
 $("#panel").addEventListener("mouseleave", () => plan.lightLayer(null));
 $("#panel").addEventListener("click", (e) => {
+  const q = (e.target as HTMLElement).closest<HTMLElement>("[data-help]");
+  if (q) { openHelp(q.dataset.help); return; }
   const r = (e.target as HTMLElement).closest<HTMLElement>("[data-row]");
   if (!r || !state.analysis) return;
   state.selected = Number(r.dataset.row);
   plan.highlight(state.analysis.results[state.selected]);
   renderPanel();
 });
-$("#layers").innerHTML = LAYERS.map((l) => `<label><input type="checkbox" data-layer="${l}" checked> ${l}</label>`).join("");
+$("#layer-boxes").innerHTML = LAYERS.map((l) =>
+  `<label><input type="checkbox" data-layer="${l}" checked> ${l}</label>`).join("");
+$("#legend").innerHTML = legendHtml();
 $("#layers").addEventListener("change", (e) => {
   const c = e.target as HTMLInputElement;
   plan.toggle(c.dataset.layer as (typeof LAYERS)[number], c.checked);

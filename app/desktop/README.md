@@ -27,7 +27,8 @@ npm run dev                                                                     
 
 | Path | Role |
 |---|---|
-| `src/main.ts` | state, panels (results, mapping, assumptions), profile load/save |
+| `src/main.ts` | state, welcome screen, panels (results, mapping, assumptions), profile load/save, help, drag and drop |
+| `src/help.ts` | help drawer content: guide, glossary of the check categories, plan legend, controls |
 | `src/plan.ts` | SVG plan viewer: layers, pan and zoom, highlight of a result |
 | `src/rpc.ts` | transport: Tauri command `sidecar` in the app, HTTP in a browser |
 | `src/types.ts` | shapes of the sidecar's answers |
@@ -41,14 +42,16 @@ the request repeated); `app/tests/sidecar_smoke.py` for the sidecar itself. All 
 ## Packaging
 
 `.github/workflows/package.yml` (push to main, tags `v*`, or run by hand) builds the Windows installer: PyInstaller
-freezes the sidecar into one `interiors-sidecar.exe`, a smoke test runs it on a room drawn on the spot, Tauri bundles
+freezes the sidecar into one `interiors-sidecar.exe` with the example plan of the welcome screen
+(`app/sidecar/samples/demo-flat.dxf`), a smoke test runs it on that plan and on a room drawn on the spot, Tauri bundles
 it next to the app (`src-tauri/tauri.release.conf.json`, `externalBin`) in an NSIS installer, uploaded as the artifact
 `interior-check-windows`. Unsigned: SmartScreen asks once (More info -> Run anyway); per-user install, no admin rights.
 The same build on macOS, locally:
 
 ```bash
 uv run --with pyinstaller --with ezdxf --with shapely pyinstaller --onefile --name interiors-sidecar --paths . \
-  --paths app/core --collect-data ezdxf app/sidecar/server.py                       # repository root
+  --paths app/core --collect-data ezdxf --add-data app/sidecar/samples:app/sidecar/samples \
+  app/sidecar/server.py                                                             # repository root
 cp dist/interiors-sidecar app/desktop/src-tauri/binaries/interiors-sidecar-$(rustc -vV | sed -n 's/^host: //p')
 cd app/desktop && npx tauri build --config src-tauri/tauri.release.conf.json --bundles app
 ```

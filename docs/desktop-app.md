@@ -248,13 +248,24 @@ Packaging (2026-10-29): `.github/workflows/package.yml` builds the Windows insta
 macOS, smoke-tested on a room drawn on the spot, bundled by Tauri as `externalBin`, NSIS, per-user, unsigned). The
 same build was run locally on macOS: the app bundle (30.6 MB) starts with no `uv` or Python on the PATH and uses the
 bundled sidecar; the first request takes about 4 s (the one-file sidecar unpacks itself), the next ones are immediate.
-The Windows job has not run yet. The UX pass added the drawing itself under the recognised plan, a diagnosis of what
-was found and what to do (3D model, no walls, no rooms, exploded doors or furniture), and layer highlighting from the
-mapping table. A layer used by entities but missing from the layer table was ignored; now it is classified.
+The Windows job runs on every push to main; tag `v0.1.0` published the installer as a GitHub pre-release. The first
+UX pass added the drawing itself under the recognised plan, a diagnosis of what was found and what to do (3D model, no
+walls, no rooms, exploded doors or furniture), and layer highlighting from the mapping table. A layer used by entities
+but missing from the layer table was ignored; now it is classified.
+
+UX pass 2, help and onboarding (2026-10-29): a welcome screen with the three steps (open, check the mapping, read the
+results) and a **Try the example** button, which opens the small flat with planted mistakes bundled with the sidecar
+(`demo` method, `app/sidecar/samples/demo-flat.dxf`, also inside the PyInstaller exe via `--add-data`); a help drawer
+(`?`, F1) with the guide, how a plan should be drawn, the confidence scale, the legend and the controls; a glossary of
+every check category (what it measures and its rule, from `docs/design-rules.md`) reached from the `?` of each result
+row, and the selected row shows the explanation and the measuring method; a plan legend and a Fit button (F) next to
+the layer boxes; drag and drop of a DXF/DWG onto the window; the Mapping tab opens with the number of choices to
+confirm. Checked in WebKit (light and dark) with Playwright against the HTTP sidecar, and the packaged sidecar
+(PyInstaller, macOS) passes `sidecar_smoke.py`, demo included.
 
 Next: recognition of exploded drawings (doors from a loose arc and leaf line on a door layer, windows and furniture as
-connected outlines, furniture typed by the user in the UI), measured on that DWG; then packaging (PyInstaller sidecar,
-installers) and the "seating facing away from the TV" check (engine first, then core).
+connected outlines, furniture typed by the user in the UI), measured on that DWG; the UI in Italian; the "seating facing
+away from the TV" check (engine first, then core).
 
 If the spike's recognition score is far below 80%, the fallback is a "trace over" mode: the architect draws walls and
 openings quickly over the imported DWG as an underlay, which is slower but always works.

@@ -1,6 +1,6 @@
 [package]
 name = "interior-check"
-version = "0.1.0"
+version = "0.1.1"
 description = "Interior Check: plan review for architects (desktop shell)"
 authors = ["llm-interior-designer"]
 edition = "2024"

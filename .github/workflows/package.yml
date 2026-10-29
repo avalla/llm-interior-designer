@@ -30,12 +30,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller ezdxf shapely
+          SEP=$(python -c "import os;print(os.pathsep)")
           pyinstaller --onefile --name interiors-sidecar --paths . --paths app/core --collect-data ezdxf \
-            --noconfirm app/sidecar/server.py
+            --add-data "app/sidecar/samples${SEP}app/sidecar/samples" --noconfirm app/sidecar/server.py
           mkdir -p app/desktop/src-tauri/binaries
           cp dist/interiors-sidecar.exe \
             "app/desktop/src-tauri/binaries/interiors-sidecar-$(rustc -vV | sed -n 's/^host: //p').exe"
-      - name: Smoke test of the packaged sidecar (one room drawn on the spot)
+      - name: Smoke test of the packaged sidecar (bundled example plan, one room drawn on the spot)
         shell: pwsh
         run: |
           $env:INTERIORS_SIDECAR = "$PWD\dist\interiors-sidecar.exe"

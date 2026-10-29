@@ -8,6 +8,7 @@ Methods
     vocabulary                             -> layer categories, furniture types, front axes (for the mapping UI)
     analyse   {path, profile?}             -> plan scene, mapping, assumptions, results with their place on the plan
     load_profile {path} / save_profile {path, profile}
+    demo                                   -> {path} of the bundled example plan (a small flat with planted mistakes)
 
     uv run --with ezdxf --with shapely python -m app.sidecar.server [--http 8765]
 """
@@ -31,7 +32,9 @@ from app.semantics import library  # noqa: E402
 from interiors_core.checks import Model  # noqa: E402
 from interiors_core.rules import RULES  # noqa: E402
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
+# PyInstaller unpacks the bundled data under sys._MEIPASS (--add-data app/sidecar/samples), the repository otherwise
+SAMPLES = os.path.join(getattr(sys, "_MEIPASS", ROOT), "app", "sidecar", "samples")
 SEVERITY = {"blocking": 0, "significant": 1, "improvement": 2, "": 3}
 
 
@@ -270,6 +273,8 @@ def handle(method, params):
         with open(params["path"], "w") as fh:
             json.dump(params["profile"], fh, indent=1)
         return dict(saved=params["path"])
+    if method == "demo":
+        return dict(path=os.path.join(SAMPLES, "demo-flat.dxf"))
     raise ValueError("unknown method: %s" % method)
 
 

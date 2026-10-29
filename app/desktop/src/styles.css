@@ -139,3 +139,66 @@ tr[data-layer-row] { cursor: default; }
 tr[data-layer-row]:hover { background: color-mix(in srgb, var(--hl) 10%, transparent); }
 .hl { fill: var(--hl); fill-opacity: 0.25; stroke: var(--hl); stroke-width: 0.035; }
 .hl-point { fill: var(--hl); stroke: #fff; stroke-width: 0.02; }
+
+/* welcome screen (no plan open) */
+.small { font-size: 12px; }
+.welcome { max-width: 520px; margin: 16px; padding: 24px 28px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; }
+.welcome h1 { font-size: 20px; margin: 0 0 4px; }
+.steps { padding-left: 20px; margin: 16px 0; }
+.steps li { margin-bottom: 6px; }
+.welcome-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 12px; }
+.welcome-actions button { padding: 6px 14px; }
+button.icon { width: 26px; height: 26px; padding: 0; border-radius: 13px; font-weight: 600; }
+
+/* plan controls: layer boxes, Fit, Legend in one row; the legend card opens above it */
+#layers { align-items: center; }
+#layers button { padding: 2px 8px; }
+#legend { bottom: 56px; flex-direction: column; gap: 4px; }
+#legend.shown { display: flex; }
+.legend-list .lg { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.legend-list .lg i { display: inline-block; width: 18px; height: 12px; flex: none; border-radius: 2px; }
+.lg-wall { background: var(--wall); }
+.lg-room { background: var(--room); border: 1px solid var(--line); box-shadow: inset 9px 0 var(--private); }
+.lg-furniture { background: var(--furniture); border: 1px solid var(--ink); }
+.legend-list .lg i.lg-front { height: 3px; background: var(--accent); }
+.lg-zone { background: color-mix(in srgb, var(--accent) 8%, transparent); border: 1px dashed var(--accent); }
+.lg-wet { background: rgba(74, 163, 223, 0.12); border: 1px solid #4aa3df; }
+.legend-list .lg i.lg-target, .legend-list .lg i.lg-start { width: 10px; height: 10px; margin: 0 4px; border-radius: 50%; }
+.lg-target { background: var(--good); }
+.lg-start { background: var(--accent); }
+.legend-list .lg i.lg-dwg { height: 1px; background: var(--muted); }
+.lg-hl { background: color-mix(in srgb, var(--hl) 25%, transparent); border: 2px solid var(--hl); }
+
+/* drag and drop */
+.drop { position: absolute; inset: 8px; display: none; align-items: center; justify-content: center; z-index: 5;
+  border: 2px dashed var(--accent); border-radius: 12px; font-size: 16px; font-weight: 600; color: var(--accent);
+  background: color-mix(in srgb, var(--bg) 85%, transparent); pointer-events: none; }
+.drop.shown { display: flex; }
+
+/* help drawer, over the results panel */
+main { position: relative; }
+#help-drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 10; box-shadow: -6px 0 18px rgba(0, 0, 0, 0.12); }
+#help-drawer[hidden] { display: none; }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px;
+  border-bottom: 1px solid var(--line); }
+#help-body { flex: 1; overflow: auto; padding: 4px 16px 16px; }
+#help-body h2 { font-size: 14px; margin: 18px 0 6px; }
+#help-body ol, #help-body ul { padding-left: 18px; }
+#help-body li { margin-bottom: 4px; }
+#help-body dt { font-weight: 600; margin-top: 10px; padding: 2px 6px; border-radius: 4px; }
+#help-body dt.focus { background: color-mix(in srgb, var(--hl) 18%, transparent); }
+#help-body dd { margin: 2px 0 0 6px; }
+#help-body .legend-list { display: flex; flex-direction: column; gap: 4px; }
+kbd { font: 11px ui-monospace, Menlo, Consolas, monospace; padding: 1px 5px; border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 4px; background: var(--bg); }
+
+/* results and mapping */
+.chip.info { background: var(--accent); }
+.q { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 6px;
+  border-radius: 50%; border: 1px solid var(--line); color: var(--muted); font-size: 11px; font-weight: 600;
+  vertical-align: 1px; }
+.q:hover { border-color: var(--accent); color: var(--accent); }
+.explain { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); font-size: 12px; }
+.ok-msg { color: var(--good); font-weight: 600; }
+.todo { padding: 6px 10px; border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 6px; }

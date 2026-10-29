@@ -10,31 +10,55 @@
   <body>
     <header>
       <strong class="brand">Interior Check</strong>
-      <button id="open" class="primary">Open plan…</button>
+      <button id="open" class="primary" title="Open a DXF or DWG plan (or drag it onto the window)">Open plan…</button>
       <span id="file" class="muted">no plan open</span>
       <span class="spacer"></span>
       <span id="summary"></span>
-      <button id="load-profile" title="Studio profile: layer, block and front mappings">Load profile…</button>
-      <button id="save-profile" disabled>Save profile…</button>
-      <button id="rerun" disabled>Re-analyse</button>
+      <button id="load-profile" title="Load a studio profile: layer roles, furniture types and front convention saved from earlier plans">Load profile…</button>
+      <button id="save-profile" disabled title="Save the corrections made in Mapping, for the next plans of the same studio">Save profile…</button>
+      <button id="rerun" disabled title="Check the plan again with the current mapping">Re-analyse</button>
+      <button id="help" class="icon" title="Help (F1)">?</button>
     </header>
     <main>
       <section id="plan-wrap">
         <svg id="plan" aria-label="Plan"></svg>
         <div id="banner"></div>
-        <div id="layers" class="card"></div>
-        <div id="empty" class="empty">
-          <p>Open a DXF (or a DWG, with the ODA File Converter installed) to check it.</p>
-          <p class="muted">Nothing leaves this computer.</p>
+        <div id="layers" class="card">
+          <span id="layer-boxes"></span>
+          <button id="fit" title="Fit the plan in the window (F)">Fit</button>
+          <button id="legend-toggle" title="What the colours mean">Legend</button>
         </div>
+        <div id="legend" class="card legend-list"></div>
+        <div id="empty" class="empty">
+          <div class="welcome">
+            <h1>Check a furnishing plan</h1>
+            <p class="muted">Clearances, routes, door swings, seats, access zones, privacy: measured on your drawing.</p>
+            <ol class="steps">
+              <li><b>Open</b> a DXF or DWG plan, or drag it here.</li>
+              <li><b>Check</b> what was recognised; fix the mapping if needed.</li>
+              <li><b>Read</b> the results: click one to see it on the plan.</li>
+            </ol>
+            <div class="welcome-actions">
+              <button id="open-2" class="primary">Open plan…</button>
+              <button id="demo" title="A small flat with planted mistakes, to see how the app reports them">Try the example</button>
+              <button id="help-2">How it works</button>
+            </div>
+            <p class="muted small">Nothing leaves this computer. DWG needs the free ODA File Converter; DXF works as is.</p>
+          </div>
+        </div>
+        <div id="drop" class="drop">Drop the plan to open it</div>
       </section>
       <aside>
         <nav id="tabs">
-          <button data-tab="results" class="active">Results</button>
-          <button data-tab="mapping">Mapping <span id="confirm-count" class="pill"></span></button>
-          <button data-tab="assumptions">Assumptions</button>
+          <button data-tab="results" class="active" title="What the checks found">Results</button>
+          <button data-tab="mapping" title="How the drawing was read: layers, furniture types, fronts">Mapping <span id="confirm-count" class="pill" title="Choices to confirm"></span></button>
+          <button data-tab="assumptions" title="Defaults the drawing does not state (heights, sills...)">Assumptions</button>
         </nav>
         <div id="panel"></div>
+      </aside>
+      <aside id="help-drawer" hidden>
+        <div class="drawer-head"><strong>Help</strong><button id="help-close" class="icon" title="Close (Esc)">×</button></div>
+        <div id="help-body"></div>
       </aside>
     </main>
     <footer id="status" class="muted">ready</footer>

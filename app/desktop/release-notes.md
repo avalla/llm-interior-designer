@@ -12,5 +12,8 @@ and furniture as **blocks**; plans drawn with loose lines and arcs are shown wit
 
 **Use:** Open plan -> what was recognised appears above the drawing; Results lists the issues (click one to see it on
 the plan); Mapping fixes layer roles and furniture types, and Save profile keeps them for the studio's next plans.
+To see it first on a plan with planted mistakes, press **Try the example** on the start screen. **?** (or F1) opens
+the help: how a plan should be drawn, what each check measures and its rule, the plan legend. A plan can also be
+dragged onto the window.
 
 Architecture, measures and limits: `docs/desktop-app.md`.
