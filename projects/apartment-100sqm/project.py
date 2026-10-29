@@ -67,16 +67,33 @@ room("Night hall", [(6.55, 3.65, 12.20, 4.75)], (9.30, 4.30), habitable=False)
 g = "Living"
 box("TV_Unit", 0.30, 1.40, 0.15, 0.75, 3.40, 0.55, c["OAK"], g)
 box("TV_65", 0.31, 1.75, 0.95, 0.36, 3.05, 1.70, c["BLACK"], g)
-box("Sofa_Seat", 3.40, 1.20, 0.01, 4.30, 3.60, 0.42, c["GREY"], g, item="Sofa")
-box("Sofa_Back", 4.30, 1.00, 0.01, 4.50, 3.80, 0.80, c["GREY"], g, item="Sofa")
-box("Sofa_Arm_S", 3.40, 1.00, 0.01, 4.30, 1.20, 0.60, c["GREY"], g, item="Sofa")
-box("Sofa_Arm_N", 3.40, 3.60, 0.01, 4.30, 3.80, 0.60, c["GREY"], g, item="Sofa")
-box("Sofa_Chaise", 2.60, 3.00, 0.01, 3.40, 3.80, 0.42, c["GREY"], g, item="Sofa")
-box("Sofa_Cushions", 4.10, 1.25, 0.42, 4.30, 3.55, 0.72, c["SAGE"], g, item="Sofa")
-box("Coffee_Table_Base", 2.00, 1.90, 0.01, 2.50, 2.50, 0.33, c["BLACK"], g, item="Coffee_Table")
-box("Coffee_Table_Top", 1.90, 1.80, 0.33, 2.60, 2.60, 0.38, c["OAK"], g, item="Coffee_Table")
-box("Armchair_Seat", 1.30, 0.60, 0.01, 2.10, 1.25, 0.42, c["TERRA"], g, item="Armchair")
-box("Armchair_Back", 1.30, 0.42, 0.01, 2.10, 0.60, 0.82, c["TERRA"], g, item="Armchair")
+# lounge layout (pre-mortem S12-S14), compared with tools/explore.py: L0 = L sofa with the chaise to the north,
+# armchair against the glazing; A = straight sofa, armchair by the window facing north; B = chaise to the window,
+# armchair closing the circle from the north-west; C = straight sofa 20 cm nearer the TV, armchair from the north-west
+LIV = PARAMS.get("living", "L0")
+SX = {"L0": 3.40, "A": 3.40, "B": 3.40, "C": 3.20}[LIV]           # sofa seat front (sofa faces west, towards the TV)
+SY0, SY1 = (1.00, 3.80) if LIV == "L0" else (1.30, 3.50)        # sofa ends, arms included
+box("Sofa_Seat", SX, SY0 + 0.20, 0.01, SX + 0.90, SY1 - 0.20, 0.42, c["GREY"], g, item="Sofa")
+box("Sofa_Back", SX + 0.90, SY0, 0.01, SX + 1.10, SY1, 0.80, c["GREY"], g, item="Sofa")
+box("Sofa_Arm_S", SX if LIV != "B" else 2.60, SY0, 0.01, SX + 0.90, SY0 + 0.20, 0.60, c["GREY"], g, item="Sofa")
+box("Sofa_Arm_N", SX, SY1 - 0.20, 0.01, SX + 0.90, SY1, 0.60, c["GREY"], g, item="Sofa")
+if LIV == "L0":
+    box("Sofa_Chaise", 2.60, 3.00, 0.01, 3.40, 3.80, 0.42, c["GREY"], g, item="Sofa")
+elif LIV == "B":
+    box("Sofa_Chaise", 2.60, 1.50, 0.01, 3.40, 2.10, 0.42, c["GREY"], g, item="Sofa")
+box("Sofa_Cushions", SX + 0.70, SY0 + 0.25, 0.42, SX + 0.90, SY1 - 0.25, 0.72, c["SAGE"], g, item="Sofa")
+CT = {"L0": (1.90, 1.80, 2.60, 2.60), "A": (2.40, 1.85, 3.00, 2.95), "B": (2.40, 2.40, 3.00, 3.40),
+      "C": (2.20, 2.20, 2.80, 3.30)}[LIV]                         # coffee table top
+box("Coffee_Table_Base", CT[0] + 0.10, CT[1] + 0.10, 0.01, CT[2] - 0.10, CT[3] - 0.10, 0.33, c["BLACK"], g, item="Coffee_Table")
+box("Coffee_Table_Top", CT[0], CT[1], 0.33, CT[2], CT[3], 0.38, c["OAK"], g, item="Coffee_Table")
+if LIV in ("L0", "A"):                                            # armchair facing north (back to the glazing)
+    AX, AY = {"L0": (1.30, 0.42), "A": (1.60, 1.10)}[LIV]
+    box("Armchair_Seat", AX, AY + 0.18, 0.01, AX + 0.80, AY + 0.83, 0.42, c["TERRA"], g, item="Armchair")
+    box("Armchair_Back", AX, AY, 0.01, AX + 0.80, AY + 0.18, 0.82, c["TERRA"], g, item="Armchair")
+else:                                                             # armchair facing east, towards the sofa
+    AX, AY = {"B": (1.30, 3.10), "C": (1.10, 3.10)}[LIV]
+    box("Armchair_Seat", AX + 0.18, AY, 0.01, AX + 0.80, AY + 0.80, 0.42, c["TERRA"], g, item="Armchair")
+    box("Armchair_Back", AX, AY, 0.01, AX + 0.18, AY + 0.80, 0.82, c["TERRA"], g, item="Armchair")
 shelf = [B(5.95, 0.60, 0, 6.45, 2.60, 0.03)]
 for z in (0.40, 0.80, 1.20, 1.60, 1.97):
     shelf.append(B(5.95, 0.60, z, 6.45, 2.60, z + 0.03))
@@ -188,11 +205,19 @@ access_zone("Closet: in front of east unit", 10.89, 4.86, 11.595, 7.09, ("Closet
 access_zone("Closet: in front of north unit", 10.38, 6.39, 11.59, 7.095, ("Closet_Unit_North",))
 
 # ======================= PHASE 3 - DETAILS, LIGHTING, DECOR =======================
-box("Rug", 1.20, 0.80, 0, 4.00, 3.60, 0.01, c["RUG"], "Living", check=False)
-# reading light next to the armchair: in its previous position it closed the access to the sofa (25 cm), lesson L06
-cyl("Floor_Lamp_Base", 1.05, 0.70, 0, 0.15, 0.03, c["BLACK"], "Living", item="Floor_Lamp")
-cyl("Floor_Lamp_Stem", 1.05, 0.70, 0.03, 0.015, 1.50, c["BLACK"], "Living", item="Floor_Lamp")
-cyl("Floor_Lamp_Shade", 1.05, 0.70, 1.50, 0.20, 0.25, c["WHITE"], "Living", item="Floor_Lamp")
+RUG = {"L0": (1.20, 0.80, 4.00, 3.60), "A": (1.40, 1.40, 3.80, 3.40), "B": (1.40, 1.50, 3.80, 3.60),
+       "C": (1.20, 1.60, 3.60, 3.60)}[LIV]
+box("Rug", RUG[0], RUG[1], 0, RUG[2], RUG[3], 0.01, c["RUG"], "Living", check=False)
+# reading lights (P14, P15): one at the armchair; L0 had none at the sofa (S13)
+# in L0 the armchair lamp's previous position closed the access to the sofa (25 cm), lesson L06
+LAMPS = {"L0": [("Floor_Lamp", 1.05, 0.70)],
+         "A": [("Floor_Lamp", 1.35, 1.35), ("Floor_Lamp_Sofa", 4.70, 1.45)],
+         "B": [("Floor_Lamp", 1.10, 3.60), ("Floor_Lamp_Sofa", 4.70, 3.35)],
+         "C": [("Floor_Lamp", 0.90, 3.60), ("Floor_Lamp_Sofa", 4.50, 1.45)]}[LIV]
+for n, lx, ly in LAMPS:
+    cyl(n + "_Base", lx, ly, 0, 0.15, 0.03, c["BLACK"], "Living", item=n)
+    cyl(n + "_Stem", lx, ly, 0.03, 0.015, 1.50, c["BLACK"], "Living", item=n)
+    cyl(n + "_Shade", lx, ly, 1.50, 0.20, 0.25, c["WHITE"], "Living", item=n)
 cyl("Plant_Pot", 0.65, 4.30, 0, 0.20, 0.45, c["TERRA"], "Living", item="Plant")   # moved off the night-door track (S15)
 add("Plant_Foliage", Part.makeSphere(0.35 * S, V(0.65 * S, 4.30 * S, 0.95 * S)), c["GREEN"], "Living", item="Plant")
 cyl("Pendant_Table", TX, TY, 1.75, 0.25, 0.18, c["BLACK"], "Dining", item="Pendant_Table")
@@ -217,8 +242,11 @@ box("Closet_Mirror", 10.35, 5.20, 0.30, 10.37, 6.00, 2.00, c["GLASS"], "Walk_in_
 
 # ======================= USES, ROUTES, CLEARANCES =======================
 entrance(7.10, 7.25)
-destination("Living: sofa (in front of seat)", 3.00, 2.00)
-destination("Living: armchair", 2.70, 1.10)
+# where a person steps into the seat: L0 in front of the seat (80 cm leg zone); A-C at the sofa's open north end,
+# because a 40 cm coffee-table gap is a leg zone, not a route
+destination("Living: sofa (in front of seat)" if LIV == "L0" else "Living: sofa (open end)",
+            *{"L0": (3.00, 2.00), "A": (3.85, 3.85), "B": (3.85, 3.85), "C": (3.65, 3.85)}[LIV])
+destination("Living: armchair", *{"L0": (2.70, 1.10), "A": (1.80, 2.45), "B": (2.70, 3.95), "C": (2.50, 3.95)}[LIV])
 destination("Living: table east side", 6.75, 6.10)
 destination("Kitchen: sink", 2.30, 6.60)
 destination("Kitchen: fridge/oven tall units", 1.30, 6.00)
