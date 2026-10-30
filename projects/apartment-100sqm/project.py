@@ -57,11 +57,11 @@ wall("Partition_Bathroom_Closet", 10.25, 4.85, 10.35, 7.7)
 box("Slab", 0, 0, -0.20, 12.5, 8.0, 0, c["FLOOR"], "Structure", check=False)
 box("Tiles_Bathroom", 8.05, 4.85, 0, 10.25, 7.7, 0.004, c["TILE"], "Structure", check=False)
 
-room("Living area", [(0.30, 0.30, 6.45, 4.85), (0.30, 4.85, 7.95, 7.70)], (2.90, 4.45))
-room("Bedroom", [(6.55, 0.30, 12.20, 3.55)], (8.70, 2.60))
-room("Bathroom", [(8.05, 4.85, 10.25, 7.70)], (9.20, 6.25), habitable=False, kind="bathroom", lines=["BATH"])
-room("Walk-in closet", [(10.35, 4.85, 12.20, 7.70)], (10.77, 6.25), habitable=False, lines=["WALK-IN", "CLOSET"])
-room("Night hall", [(6.55, 3.65, 12.20, 4.75)], (9.30, 4.30), habitable=False)
+room("Living area", [(0.30, 0.30, 6.45, 4.85), (0.30, 4.85, 7.95, 7.70)], (2.90, 4.45), kind="living")
+room("Bedroom", [(6.55, 0.30, 12.20, 3.55)], (8.70, 2.60), kind="bedroom")
+room("Bathroom", [(8.05, 4.85, 10.25, 7.70)], (9.20, 6.25), kind="bathroom", lines=["BATH"])
+room("Walk-in closet", [(10.35, 4.85, 12.20, 7.70)], (10.77, 6.25), kind="store", lines=["WALK-IN", "CLOSET"])
+room("Night hall", [(6.55, 3.65, 12.20, 4.75)], (9.30, 4.30), kind="corridor")
 
 # ======================= PHASE 2 - MAIN FURNITURE =======================
 g = "Living"
@@ -102,7 +102,7 @@ add("Bookcase", Part.makeCompound(shelf), c["OAK"], g)
 tv("TV_65")
 
 g = "Dining"
-TX, TY, TR = PARAMS.get("table_x", 5.35), PARAMS.get("table_y", 6.10), 0.55
+TX, TY, TR = PARAMS.get("table_x", 5.40), PARAMS.get("table_y", 6.10), 0.55   # 5.40: 80 cm from the island (L29 move)
 cyl("Table_Base", TX, TY, 0, 0.28, 0.03, c["BLACK"], g, item="Table")
 cyl("Table_Leg", TX, TY, 0.03, 0.06, 0.69, c["BLACK"], g, item="Table")
 cyl("Table_Top", TX, TY, 0.72, TR, 0.03, c["OAK"], g, item="Table")
@@ -117,15 +117,17 @@ box("Tall_Units_Fridge_Oven", 0.30, 5.00, 0, 0.90, 7.05, 2.30, c["WHITE"], g)
 box("Plinth", 0.30, 7.15, 0, 4.50, 7.70, 0.10, c["BLACK"], g, item="Base_Units")
 box("Base_Units", 0.30, 7.10, 0.10, 4.50, 7.70, 0.86, c["WHITE"], g, item="Base_Units")
 box("Worktop", 0.30, 7.05, 0.86, 4.50, 7.70, 0.90, c["BLACK"], g, item="Base_Units")
-# appliance doors with a person in front (pre-mortem S07, S08)
+# appliance doors with a person in front (pre-mortem S07, S08): hinged fridge door = leaf + 70 cm; drop-down oven and
+# dishwasher doors = door projection + 70 cm (L29), so the island starts east of the oven zone and the dishwasher sits
+# west of the sink, out of the island's shadow
 hinged("Fridge_Door", 0.90, 6.40, (0, -1), (1, 0), 0.60, hgt=1.85, leaf=False, kind="Appliance door", handle=False,
        own="Tall_Units_Fridge_Oven")
 access_zone("Kitchen: in front of fridge", 0.91, 5.80, 1.61, 6.40, ("Tall_Units_Fridge_Oven",), depth=0.70)
-access_zone("Kitchen: in front of oven", 0.91, 5.05, 1.61, 5.75, ("Tall_Units_Fridge_Oven",))
-access_zone("Kitchen: dishwasher door open", 2.70, 6.34, 3.30, 7.045, ("Base_Units",), depth=0.705)
-box("Island_Base", 1.80, 5.40, 0, 3.70, 6.10, 0.90, c["WHITE"], g, item="Island")
-box("Island_Top", 1.75, 5.05, 0.90, 3.75, 6.10, 0.94, c["OAK"], g, item="Island")   # aisle 95 cm: 90 was at zero margin
-for i, x in enumerate((2.15, 2.75, 3.35)):
+appliance_zone("Kitchen: oven", 0.30, 5.05, 0.90, 5.75, "+x", ("Tall_Units_Fridge_Oven",), "oven")
+appliance_zone("Kitchen: dishwasher", 0.90, 7.10, 1.50, 7.70, "-y", ("Base_Units",), "dishwasher")
+box("Island_Base", 2.20, 5.40, 0, 4.00, 6.10, 0.90, c["WHITE"], g, item="Island")
+box("Island_Top", 2.15, 5.05, 0.90, 4.05, 6.10, 0.94, c["OAK"], g, item="Island")   # 190 long, 4 cm east of the oven zone
+for i, x in enumerate((2.55, 3.10, 3.65)):
     n = "Stool_%d" % (i + 1)
     cyl(n + "_Seat", x, 4.85, 0.62, 0.19, 0.05, c["BLACK"], g, item=n)
     cyl(n + "_Leg", x, 4.85, 0, 0.03, 0.62, c["BLACK"], g, item=n)
@@ -222,7 +224,7 @@ cyl("Plant_Pot", 0.65, 4.30, 0, 0.20, 0.45, c["TERRA"], "Living", item="Plant") 
 add("Plant_Foliage", Part.makeSphere(0.35 * S, V(0.65 * S, 4.30 * S, 0.95 * S)), c["GREEN"], "Living", item="Plant")
 cyl("Pendant_Table", TX, TY, 1.75, 0.25, 0.18, c["BLACK"], "Dining", item="Pendant_Table")
 cyl("Pendant_Table_Cord", TX, TY, 1.93, 0.005, 2.70 - 1.93, c["BLACK"], "Dining", item="Pendant_Table")
-for i, x in enumerate((2.35, 3.15)):
+for i, x in enumerate((2.70, 3.50)):
     cyl("Pendant_Island_%d" % (i + 1), x, 5.60, 1.70, 0.12, 0.18, c["BLACK"], "Kitchen", item="Pendant_Island_%d" % i)
     cyl("Pendant_Island_%d_Cord" % (i + 1), x, 5.60, 1.88, 0.005, 2.70 - 1.88, c["BLACK"], "Kitchen", item="Pendant_Island_%d" % i)
 box("Hob", 3.35, 7.15, 0.90, 3.95, 7.65, 0.905, (0.05, 0.05, 0.05), "Kitchen")
@@ -263,16 +265,16 @@ route("Night route bed -> WC", "Bedroom: bed north side", "Bathroom: WC")
 electrical("Washing_Machine", "Towel_Warmer")
 wet_zone("Shower open side (south)", 8.75, 6.10, 9.44, 6.70)
 private_room("Bedroom")
-no_view("Entrance: WC not visible", (7.10, 7.25), "WC_Wall_Hung")
-no_view("Entrance: bed not visible", (7.10, 7.25), "Bed_Frame")
+intimate("WC_Wall_Hung", "Bed_Frame")              # screened from the entrance, the table, the stools and the sofa (L25)
+viewpoint("sofa", SX + 0.45, (SY0 + SY1) / 2, seated=True)
 
-clearance("Entrance -> night zone: table / entrance wardrobe", "Table_Top", "Entrance_Wardrobe", 0.80, 0.90)
-clearance("Entrance -> night zone: south chair / partition", "Chair_3", "Partition_Living", 0.80, 0.90)
-clearance("Kitchen: island / base units", "Island_Top", "Worktop", 0.90, 1.10)
-clearance("Kitchen: island / tall units", "Island_Top", "Tall_Units_Fridge_Oven", 0.80, 0.90)
-clearance("Night hall: width", "Partition_Bedroom", "Partition_Hall_North", 1.00, 1.10)
-clearance("Bedroom: bed south side", "Bed_Frame", "Wall_South", 0.60, 0.70)
-clearance("Bedroom: bed north side", "Bed_Frame", "Partition_Bedroom", 0.60, 0.70)
+clearance("Entrance -> night zone: table / entrance wardrobe", "Table_Top", "Entrance_Wardrobe", kind="passage")
+clearance("Entrance -> night zone: south chair / partition", "Chair_3", "Partition_Living", kind="passage")
+clearance("Kitchen: island / base units", "Island_Top", "Worktop", kind="aisle")
+clearance("Kitchen: island / tall units", "Island_Top", "Tall_Units_Fridge_Oven", kind="passage")
+clearance("Night hall: width", "Partition_Bedroom", "Partition_Hall_North", kind="corridor")
+clearance("Bedroom: bed south side", "Bed_Frame", "Wall_South", kind="bed_side")
+clearance("Bedroom: bed north side", "Bed_Frame", "Partition_Bedroom", kind="bed_side")
 clearance("Closet: in front of east unit", "Closet_Unit_East", "Partition_Bathroom_Closet", 0.90, 1.00)
 
 not_verifiable("Living window 4.60 m rough opening", "lintel to be sized by a structural engineer")

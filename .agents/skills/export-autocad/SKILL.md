@@ -7,8 +7,9 @@ description: Exports a project for AutoCAD (2D plan DWG with dimensions and laye
 
 ## Steps
 
-1. **Project at zero problems.** Run `projects/<name>/project.py` in FreeCAD; it must end with `TOTAL PROBLEMS: 0`.
-   With open problems, fix them (`furnishing` skill) or ask whether the user wants a conditional proposal anyway.
+1. **Project at zero problems.** Run `projects/<name>/project.py` in FreeCAD; it must end with `TOTAL PROBLEMS: 0`
+   (ACCEPTED results, with the client's name and date, are not problems). With open problems, fix them (`furnishing`
+   skill) or ask whether the user wants a conditional proposal anyway.
 
 2. **Annotations.** If walls or openings changed, update the `dimensions()` chains and the door/window `label()` calls in
    `project.py`, using the rough openings from the report. Room areas, title block and sliding-door symbols update by
@@ -18,8 +19,8 @@ description: Exports a project for AutoCAD (2D plan DWG with dimensions and laye
    `round-trip OK`.
 
 4. **Preview.** Open `output/<Name>_Plan.png` (generated from the re-read DWG): texts overlapping dimensions or furniture,
-   unreadable dimensions, recognisable doors and sliding doors, visible windows. Fix positions in `project.py` and repeat
-   from step 3. Done when the preview is clean.
+   unreadable dimensions, recognisable doors and sliding doors, visible windows (a door read as missing is FMEA F16,
+   lesson L05). Fix positions in `project.py` and repeat from step 3. Done when the preview is clean.
 
 ## Delivery
 

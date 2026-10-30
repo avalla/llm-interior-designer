@@ -49,7 +49,7 @@ actually run. Passing core parity does not prove complete coverage of a DWG or D
 | Clearances | kitchen aisle, island to tall units, bed sides, main passages | 90 (comfort 110), 80/90, 60/70, 80/90 cm |
 | Access zones | free floor in front of wardrobes, cabinets, appliances | import currently generates 70 cm; appliance door projection is missing, so this does not verify use with the door open (L29) |
 | Routes | every destination (sofa, bed sides, WC, wardrobes...) reachable from the entrance | continuous 60 cm path, open doors as obstacles |
-| Privacy | shared rooms reached only through a bedroom; WC and bed seen from the entrance | route with private rooms blocked; sightline with doors open |
+| Privacy | shared rooms reached only through a bedroom; WC and bed seen from the entrance (FreeCAD projects also check seats and declared viewpoints, and the way into bedrooms by room kind; the importer declares neither yet) | route with private rooms blocked; sightline with doors open |
 | Light and air | daylight in habitable rooms, window or ventilation in bathrooms | glazing ≥ 1/8 of the floor (indicative) |
 | Brief constraints | TV above, in front of or next to a window on the same wall | ≥ 1 m, 1.5 m better |
 | Safety | electrical items in the splash zone of a shower or bath | none within 60 cm of an open side |

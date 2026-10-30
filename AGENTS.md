@@ -51,15 +51,30 @@ Reusable base for designing and checking furnishing layouts (apartments, villas,
 - The model lives in the script: changes are made in `project.py`, never by hand in the `.FCStd`.
 - Metres, origin at the outer SW corner, y points north; `interior` = inner face of the perimeter walls.
 - `window()` and `opening()` before the `wall()` calls they cross; openings already include subframes and jambs.
-- Every piece of furniture with a use registers that use (`chair`, `access_zone`, `destination`, `clearance`, `tv`,
-  `height_match`): without registration the checks cannot see it. Parts of the same piece share `item=`.
+- Every piece of furniture with a use registers that use (`chair`, `access_zone`, `appliance_zone`, `destination`,
+  `clearance`, `tv`, `height_match`): without registration the checks cannot see it. Parts of the same piece share `item=`.
+- Every `room()` has a `kind` (bedroom, single_bedroom, living, dining, kitchen, bathroom, corridor, laundry, store,
+  service): minimum areas, under-furnished and empty rooms, oversized laundries and the way into bedrooms are checked
+  on it. Drop-down appliance doors are `appliance_zone(kind="dishwasher"|"oven"|"drawer")`; named distances are
+  `clearance(kind="corridor"|"passage"|"aisle"|"bed_side")`, so thresholds come from `RULES`, never retyped.
 - Plan texts (dimensions, labels) live in the project; room areas and sliding-door symbols are computed.
 - Technical objects excluded from the plan by name use unambiguous prefixes (`Slab`, `Tiles_`, `_Track`) (L12).
-- Every brief requirement has an id (`R01`...) and a `requirement()` linked to the checks that prove it, or `manual=True`.
-- Bedrooms are `private_room()`; WC and beds get a `no_view()` from the entrance.
+- Every brief requirement has an id (`R01`...) and a `requirement()` linked to the checks that prove it, or
+  `manual=True` while the review is pending, then `manual="reviews/<file>.md"` (the file must exist and cite the id).
+- Bedrooms are `private_room()`; WC and beds are `intimate()`: the engine checks their sightlines from the entrance,
+  from every `seat()`/`chair()` and from every `viewpoint()` (declare one for each sofa and stair arrival) (L25).
+- A defect is accepted only by the client: `accepted(pattern, by, date, reason)` in the project turns the result
+  ACCEPTED in the report; "founded, acceptance proposed" in a review is a proposal, never a verdict (L28).
+- Multi-storey projects: one document, `verify()` and report per floor (`floor_<name>()`), the stair arrival as that
+  floor's `entrance()`, floor-wide requirements declared once, one total printed across the floors.
+- Bedrooms and the shared bathroom open onto circulation, never through a living or family room; service rooms are
+  sized on their contents, not on the leftover (L23, L24).
 - Values worth comparing (table, sofa, bed positions) are read from `PARAMS`, so `tools/explore.py` can vary them.
-- Changes to skills, docs or checks are followed by the `prompt-evals` skill: no recall may drop (`evals/history.md`).
-- A new check goes into `lib/interiors.py`, with its threshold in `RULES` and in `docs/design-rules.md`, and is proven with a
+- Changes to skills, docs or checks are followed by the `prompt-evals` skill: no recall may drop, and the row in
+  `evals/history.md` lands in the same commit as the change.
+- A new check goes into `lib/interiors.py` and its mirror `app/core/interiors_core/checks.py` (parity test), with its
+  threshold in `RULES`, in `app/core/interiors_core/rules.py` and in `docs/design-rules.md` (`ci/check_repo.py` checks
+  that every key has its row), and is proven with a
   counter-test (lesson L04).
 
 ## Skills (`.agents/skills/`, Agent Skills standard; `.claude/skills` links to the same folder)

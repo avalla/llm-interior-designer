@@ -168,6 +168,49 @@
           "jamb"
         ]
       ]
+    },
+    {
+      "id": "A10",
+      "text": "Double bedroom of 9.9 m2, below the 14 m2 reference",
+      "engine": [
+        "Programme/Bedroom - area"
+      ],
+      "keywords": [
+        [
+          "bedroom"
+        ],
+        [
+          "14",
+          "9.9",
+          "small",
+          "minimum",
+          "area",
+          "m2"
+        ]
+      ]
+    },
+    {
+      "id": "A11",
+      "text": "Bedroom opening straight off the living room: the living room is its corridor",
+      "engine": [
+        "Privacy/Bedroom: entered from"
+      ],
+      "keywords": [
+        [
+          "bedroom"
+        ],
+        [
+          "living"
+        ],
+        [
+          "through",
+          "off",
+          "opens",
+          "corridor",
+          "hall",
+          "directly"
+        ]
+      ]
     }
   ]
 }

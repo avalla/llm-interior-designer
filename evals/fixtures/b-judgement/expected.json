@@ -98,6 +98,51 @@
           "see*"
         ]
       ]
+    },
+    {
+      "id": "B6",
+      "text": "Double bedroom of 9.9 m2, below the 14 m2 reference",
+      "engine": [
+        "Programme/Bedroom - area"
+      ],
+      "keywords": [
+        [
+          "bedroom"
+        ],
+        [
+          "14",
+          "9.9",
+          "small",
+          "minimum",
+          "area",
+          "m2"
+        ]
+      ]
+    },
+    {
+      "id": "B7",
+      "text": "Bedroom and bathroom opening straight off the living room, with no hall",
+      "engine": [
+        "Privacy/Bedroom: entered from",
+        "Privacy/Bathroom: entered from"
+      ],
+      "keywords": [
+        [
+          "bedroom",
+          "bathroom"
+        ],
+        [
+          "living"
+        ],
+        [
+          "through",
+          "off",
+          "opens",
+          "corridor",
+          "hall",
+          "directly"
+        ]
+      ]
     }
   ]
 }

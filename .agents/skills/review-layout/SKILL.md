@@ -24,7 +24,8 @@ A review **measures and judges**; the project stays unchanged until the user con
 
 4. **Full pass.** Apply to every room the checks in section 7 of `method.md`, the patterns in `patterns.md`, the scenarios in
    section 8 and the antipatterns in section 9. Read every object for its use: open it, sit on it, stand in front of it,
-   walk past it, see it from the entrance. Check that every brief requirement is visibly satisfied. Take measures from the
+   walk past it, see it from the entrance and from every seat; measure the route to each lounge seat against the
+   straight distance (F20). Check that every brief requirement is visibly satisfied. Take measures from the
    model in FreeCAD with read-only code (`distToShape`, `common`, bounding boxes) or by rerunning `verify()` on the
    unchanged project. Done when every room has been walked through and every requirement has a status.
 

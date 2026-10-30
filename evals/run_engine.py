@@ -1,7 +1,8 @@
 # Engine regression eval. Run INSIDE FreeCAD:
 #   exec(open("/Users/andrea/dev/tmp/freecad/evals/run_engine.py").read(), {})
 # For every fixture, runs verify() and checks that each expected "Category/Element" is NON-COMPLIANT (recall),
-# then lists NON-COMPLIANT results that no defect expects (possible false positives). Writes evals/results/engine.md.
+# then lists NON-COMPLIANT results that no defect expects (possible false positives: a fixture fails only for its
+# planted defects, lesson L16). Writes evals/results/engine.md.
 import fnmatch
 import glob
 import json

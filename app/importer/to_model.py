@@ -244,7 +244,8 @@ def build(res, rules, name="imported", profile=None):
     model = dict(name=name, height=DEFAULTS["room_height"], interior=list(res["walls"].bounds), rules=rules,
                  assumptions=A, plan_2d=True, start=None, walls=[], objects=[], named={}, doc_names=[], doors=[],
                  slides=[], seats=[], access=[], rooms=[], windows=[], tv=[], heights=[], elec=[], wet=[], private=[],
-                 views=[], requirements=[], not_verifiable=[], targets={}, routes=[], clearances=[], reference=[])
+                 views=[], viewpoints=[], intimate=[], accepted=[], requirements=[], not_verifiable=[], targets={},
+                 routes=[], clearances=[], reference=[])
     _windows(model, res["walls"], res["windows"], A)
     _rooms(model, res["rooms"])
     entrance = _doors(model, res, rules)

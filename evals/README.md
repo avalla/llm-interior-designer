@@ -15,4 +15,5 @@ Procedure: skill `prompt-evals` (`.agents/skills/prompt-evals/SKILL.md`).
 | Fixture | Purpose |
 |---|---|
 | `a-planted-checks` | defects `verify()` must catch: engine regression, plus review recall on measurable defects |
-| `b-judgement` | defects only a review can catch: measures the quality of `review-layout` and `pre-mortem` |
+| `b-judgement` | defects only a review can catch: measures the quality of `review-layout` and `pre-mortem` (B6, B7: the toy envelope's own layout defects, caught by the engine since 2026-10-29) |
+| `c-programme-privacy` | defects of lessons L23-L29: WC and bed in view from the entrance and the seats, dishwasher zone against an island, under-furnished and empty rooms, oversized laundry, a bedroom below the minimum area, a stale client acceptance |

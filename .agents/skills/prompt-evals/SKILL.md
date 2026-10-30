@@ -6,8 +6,9 @@ description: Measures the quality of the engine and of the review prompts on fix
 # Prompt evals
 
 Fixtures live in `evals/fixtures/<case>/` (`project.py` + `expected.json` with the planted defects). Fixture A holds defects
-`verify()` must catch; fixture B holds defects only a review can catch. Recall per case is the score; compare it before
-and after every change to `.agents/skills/`, `docs/` or `lib/interiors.py`.
+`verify()` must catch; fixture B holds defects only a review can catch; fixture C holds the programme, privacy, appliance
+and acceptance defects of lessons L23-L29. Recall per case is the score; compare it before and after every change to
+`.agents/skills/`, `docs/` or `lib/interiors.py`, and commit the `evals/history.md` row together with the change.
 
 ## Steps
 
@@ -28,7 +29,11 @@ and after every change to `.agents/skills/`, `docs/` or `lib/interiors.py`.
    `docs/patterns.md`) or the keyword list in `expected.json` is too narrow (fix the fixture, never to inflate a score).
 
 5. **Record.** Append a row to `evals/history.md`: date, change under test, engine recall, review recall per case.
-   A change that lowers any recall is reverted or reworked.
+   A change that lowers any recall is reverted or reworked. The row lands in the same commit as the change: a change
+   without its row is incomplete.
+
+6. **New rule, new planted defect.** A lesson that yields a check also yields a fixture defect that the check must
+   catch (counter-test, L04): add it to the fixture whose envelope can host it, or to a new fixture.
 
 Adding a fixture: a new folder with `project.py` and `expected.json`; every defect has an `engine` list (checks that must
 fail, empty for judgement defects) and `keywords` (groups that must all appear in one finding).

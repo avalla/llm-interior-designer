@@ -3,7 +3,11 @@
 # - .claude/skills is a symlink to .agents/skills
 # - every evals/fixtures/*/expected.json is valid and well formed
 # - relative links in Markdown files point to existing files
+# - RULES in lib/interiors.py equals app/core/interiors_core/rules.py, and every key has its row in docs/design-rules.md
+# - every lesson (Lnn), FMEA row (Fnn) and pattern (Pnn) id is cited somewhere outside its own file (rules that are
+#   written but wired nowhere are the failure mode of docs/lessons.md "Applied:")
 import glob
+import importlib.util
 import json
 import os
 import re
@@ -51,6 +55,36 @@ for md in glob.glob("**/*.md", recursive=True):
             continue
         if not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(md), target))):
             errors.append("%s: broken link %s" % (md, target))
+
+# RULES: engine vs core vs design-rules.md
+try:
+    src = open("lib/interiors.py").read()
+    block = re.search(r"^RULES = dict\((.*?)^\)", src, re.S | re.M).group(0)
+    engine_ns = {}
+    exec(block, engine_ns)
+    spec = importlib.util.spec_from_file_location("core_rules", "app/core/interiors_core/rules.py")
+    core = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(core)
+    if json.loads(json.dumps(engine_ns["RULES"])) != json.loads(json.dumps(core.RULES)):
+        errors.append("RULES differ between lib/interiors.py and app/core/interiors_core/rules.py")
+    rules_md = open("docs/design-rules.md").read()
+    for key in engine_ns["RULES"]:
+        if not re.search(r"`%s[`.]" % re.escape(key), rules_md):
+            errors.append("docs/design-rules.md: no row names the RULES key `%s`" % key)
+except Exception as exc:  # noqa: BLE001
+    errors.append("RULES check failed: %s" % exc)
+
+# Lnn / Fnn / Pnn ids cited outside their own file
+SCOPE = ["AGENTS.md", "README.md"] + glob.glob("docs/*.md") + glob.glob(".agents/skills/*/SKILL.md") \
+    + glob.glob("lib/*.py") + glob.glob("app/core/**/*.py", recursive=True) + glob.glob("app/semantics/*.py") \
+    + glob.glob("app/importer/*.py") + glob.glob("evals/*.py") + glob.glob("evals/*.md") \
+    + glob.glob("evals/fixtures/*/expected.json") + glob.glob("ci/*.py") + glob.glob("tools/*")
+texts = {p: open(p).read() for p in SCOPE if os.path.isfile(p)}
+for home, pattern in (("docs/lessons.md", r"^\*\*(L\d\d) - "), ("docs/fmea.md", r"^\| (F\d\d) \|"),
+                      ("docs/patterns.md", r"^\| (P\d\d) \|")):
+    for rid in re.findall(pattern, texts[home], re.M):
+        if not any(re.search(r"\b%s\b" % rid, t) for p, t in texts.items() if p != home):
+            errors.append("%s: %s is defined but cited nowhere else (wire it or drop it)" % (home, rid))
 
 print("\n".join(errors) if errors else "repository checks OK")
 sys.exit(1 if errors else 0)

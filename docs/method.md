@@ -70,13 +70,15 @@ tolerance analysis (Robustness), failure modes ranked in [`fmea.md`](fmea.md), n
 
 ## 5. Layout
 
-- Sleep is protected from entrance, TV, kitchen, laundry, plant rooms.
+- Sleep is protected from entrance, TV, kitchen, laundry, plant rooms; living spaces take the sunny side and bedrooms
+  the morning light where climate and noise allow (P04, P05).
 - No bedroom is a through route; the shared bathroom is not reachable only through a bedroom.
 - No living, dining or family room is a through route either: bedrooms and the shared bathroom open onto a hall, corridor
   or stair hall. With no corridor in the plan, carve one (1.00 m) before accepting the compromise (L23).
 - Service rooms (laundry, storage, plant) are sized on what they hold, not on the space left over; leftover area goes to
   the rooms that need it or is declared as storage on its own (L24).
-- Beds and WCs are not visible from the entrance.
+- Beds and WCs (`intimate()`) are not visible, with the doors open, from the entrance, from any seat (table, desk,
+  stools) or from the declared viewpoints (sofa, stair arrivals): the engine draws the sightlines (L25).
 - Guests use the living area and a bathroom without crossing the private zone (with a single bathroom, state the compromise).
 - Kitchen, table, pantry and bins are close; shopping, laundry and cleaning have practical routes.
 - No leftover rooms or oversized corridors; shorter corridors must not cost privacy.
@@ -84,30 +86,33 @@ tolerance analysis (Robustness), failure modes ranked in [`fmea.md`](fmea.md), n
 ## 6. Composition (after function)
 
 - Different furniture groups sit in different regions of the room, with open floor between them.
-- Every seat has a surface within reach and its reading light next to it (not in a distant corner).
+- Every seat has a surface within reach and its reading light next to it (not in a distant corner); the seats differ
+  in kind (sofa, reading chair, dining chairs, stools: P07 Sequence of sitting spaces), the light sits where the
+  activity is (P14, P15) and the main window of a room gets a seat or a work surface (P09 Window place).
 - Repeated units (pairs of nightstands, rows of chairs) are identical: build them once in a loop.
 - A wall carries 2-3 elements, unless it is an intentional storage wall.
-- Floor occupancy of habitable rooms within 40%: above that the room feels crowded ("oppressive").
+- Floor occupancy of habitable rooms between 10% and 40%: above, the room feels crowded ("oppressive"); below, it holds
+  only what a check needs (L26).
 - Seat height matches the surface it serves (dining 0.75/0.47; counter 0.90-1.05 with a matching stool).
 - Wall-backed furniture (headboards, benches, bookcases) sits flush with the wall, no gaps.
 
 ## 7. Checks per room
 
-**Programme, in every room.** Who uses it and for what (brief par. 2-4), and one object per function: a bed per
+**Programme, in every room (P03 for the entrance).** Who uses it and for what (brief par. 2-4), and one object per function: a bed per
 occupant, a seat per occupant plus guests, hanging and shelf metres as asked, a place for coats, shoes, linen, suitcases,
 cleaning, bins. An empty room, a bare half of a room or a room holding only what a check needs is a defect, not a
 clean result; the brief is never rewritten to match the model (L26, L27).
 
-**Night zone.** Bed reachable from the sides in use (double bed: both); bed, nightstands, door and open wardrobe coexist;
+**Night zone (P12, P13; F12).** Bed reachable from the sides in use (double bed: both); bed, nightstands, door and open wardrobe coexist;
 headboard not under a window without checking opening and comfort; blackout and independent reading lights; wardrobes
 sized on real contents; noise from drains and services on shared walls.
 
-**Kitchen and dining.** Store, wash, prepare, cook, clean up in the real order of use; landing space next to appliances;
+**Kitchen and dining (P06, P10).** Store, wash, prepare, cook, clean up in the real order of use; landing space next to appliances;
 fridge, oven, dishwasher and corner units open with a person in front; sink, tap and window without interference; no
 island at the expense of passages; table sized for occupants and guests, with occupied chairs (the space to sit down is
 not the space to walk behind a seated person).
 
-**Living, TV, work.** Main routes outside conversation and viewing zones; coffee tables within reach; TV facing the main
+**Living, TV, work (P11, P18; F11).** Main routes outside conversation and viewing zones; coffee tables within reach; TV facing the main
 seats, not above/in front of/next to a window on the same wall, not above a fireplace without a check; workstation out of
 the circulation, with glare-free light and space behind the chair.
 
@@ -121,7 +126,10 @@ tipping; exits, panels and valves reachable; quantitative performance (lux, acou
 
 **Villas and multi-storey.** Entrance-garage-kitchen-storage relationships; stairs (geometry, landings, guarding, light);
 privacy between occupants, guests and service areas; load capacity of terraces, tubs and pools always to be checked by
-an engineer.
+an engineer. Model conventions: one document, one `verify()` and one report per floor, in a `floor_<name>()` function;
+the stair arrival is the floor's `entrance()` (routes start there and it is a viewpoint); a requirement that spans floors
+(envelope, style) is declared on one floor only; the run ends with one total across the floors; trips between floors
+(laundry, night route to a bathroom on another level) are counted in the brief, not measured.
 
 ## 8. Scenarios to simulate
 

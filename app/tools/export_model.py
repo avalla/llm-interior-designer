@@ -40,7 +40,7 @@ def solids(shape):
 
 def export(name, engine, folder=OUT):
     ST = engine.ST
-    named = set(ST.TV) | {t for _l, _e, _z, t in ST.VIEWS}
+    named = set(ST.TV) | {t for _l, _e, _z, t in ST.VIEWS} | {t for t in ST.INTIMATE if ST.doc.getObject(t) is not None}
     for _l, a, b, _mn, _cf in ST.CLEAR:
         named |= {a, b}
     model = dict(
@@ -60,6 +60,8 @@ def export(name, engine, folder=OUT):
         tv=list(ST.TV), heights=[list(h) for h in ST.HEIGHTS], elec=list(ST.ELEC),
         wet=[dict(label=lb, zone=solids(z)) for lb, z in ST.WET],
         private=list(ST.PRIVATE), views=[dict(label=lb, eye=list(e), eye_z=z, target=t) for lb, e, z, t in ST.VIEWS],
+        viewpoints=[dict(label=v["label"], eyes=[list(e) for e in v["eyes"]]) for v in ST.VIEWPOINTS],
+        intimate=list(ST.INTIMATE), accepted=[dict(a) for a in ST.ACCEPTED],
         requirements=[dict(r, verified_by=list(r["verified_by"]), satisfied_by=list(r["satisfied_by"])) for r in ST.REQS],
         not_verifiable=[list(x) for x in ST.NOTVERIF],
         start=list(ST.START) if ST.START else None,

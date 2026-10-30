@@ -35,10 +35,11 @@ wall("Partition_Living", 4.40, 0.3, 4.50, 5.7)
 wall("Partition_Bathroom", 4.50, 3.40, 7.70, 3.50)
 box("Slab", 0, 0, -0.2, 8.0, 6.0, 0, c["FLOOR"], "Structure", check=False)
 
-room("Living", [(0.30, 0.30, 4.40, 5.70)], (2.0, 3.3))
-room("Bedroom", [(4.50, 0.30, 7.70, 3.40)], (5.6, 2.9))
-room("Bathroom", [(4.50, 3.50, 7.70, 5.70)], (5.6, 5.2), habitable=False, kind="bathroom")
+room("Living", [(0.30, 0.30, 4.40, 5.70)], (2.0, 3.3), kind="living")
+room("Bedroom", [(4.50, 0.30, 7.70, 3.40)], (5.6, 2.9), kind="bedroom")
+room("Bathroom", [(4.50, 3.50, 7.70, 5.70)], (5.6, 5.2), kind="bathroom")
 private_room("Bedroom")
+intimate("WC", "Bed")
 
 g = "Living"
 box("Shoe_Cabinet", 1.00, 5.30, 0, 1.50, 5.70, 1.00, c["WHITE"], g)
@@ -52,7 +53,7 @@ chair("Chair_2", 1.28 + 0.75, 2.85, 1, 0, g, "Table", 0.45)
 box("Worktop", 2.00, 5.10, 0, 4.30, 5.70, 0.90, c["WHITE"], g)
 cyl("Tap", 2.80, 5.62, 0.90, 0.02, 0.35, c["STEEL"], g)
 box("Island", 2.20, 3.60, 0, 3.50, 4.20, 0.92, c["OAK"], g)
-clearance("Kitchen aisle", "Island", "Worktop", 0.90, 1.10)
+clearance("Kitchen aisle", "Island", "Worktop", kind="aisle")
 
 g = "Bedroom"
 box("Bed", 5.40, 0.80, 0.01, 7.00, 2.75, 0.60, c["WHITE"], g)

@@ -25,9 +25,17 @@ failed and explain why. Run it after `verify()` is at zero and before delivery.
    > Also list each brief requirement you cannot see satisfied. Do not soften: an empty list needs a reason per room.
    > Write the result to `<project>/reviews/premortem-<date>.md` (versioned: it is part of the design record).
 
-3. **Triage.** For every failure story, as the designer: **founded** (fix it with the `furnishing` skill), **founded but
-   accepted** (state the compromise to the user), or **unfounded** (explain with a measure). Write the verdicts next to
-   each story in the same file.
+3. **Triage.** For every failure story, as the designer: **founded** (fix it with the `furnishing` skill), **founded,
+   acceptance proposed** (state the compromise and its cost; only the user can accept it, and their answer is logged next
+   to the story), or **unfounded** (explain with a measure). A verdict may not rest on anything that is not drawn: a fix
+   that is an object (closet, chair, rail, screen) is modelled before the verdict is written; a fix that is a
+   specification ("sliding door", "acoustic lining") becomes a `not_verifiable()` or a plan label, and the story stays
+   founded until then (L28). When the user accepts a proposed compromise, their answer goes into the project as
+   `accepted("Category/Element", by, date, reason)`: the report shows the result as ACCEPTED, and an acceptance that no
+   longer matches a failing check is reported as stale. Count the "acceptance proposed" stories that are not forced by
+   a fixed constraint of the brief (envelope, windows, stair, services): if they are more than a third of the stories,
+   the layout is wrong, not the reviewer: go back to step 1 of the `furnishing` skill. Write the verdicts next to each
+   story in the same file, and point the `requirement(manual=...)` of every requirement judged here at this file.
 
 4. **Close the loop.** A founded story that `verify()` did not catch becomes a lesson in `docs/lessons.md`, updates the
    FMEA row in `docs/fmea.md` (occurrence and detection) and, when measurable, a new check with a counter-test.

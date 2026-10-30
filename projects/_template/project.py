@@ -23,14 +23,19 @@ c = COL
 # window("Window_X", yc, x0, x1, sill, head, "Room")
 # opening("Door_X", x0, y0, x1, y1, rough_h, net_w, net_h); jambs(...); hinged(...) / sliding(...)
 # wall("Wall_X", x0, y0, x1, y1)
-# room("Room", [(x0, y0, x1, y1)], (label_x, label_y), habitable=True)
-# entrance(x, y); private_room("Bedroom"); no_view("Entrance: WC not visible", (x, y), "WC")
-# requirement("R01", "text from brief.md", ("Category/Element pattern", ...), ("object", ...))  or manual=True
+# room("Room", [(x0, y0, x1, y1)], (label_x, label_y), kind="bedroom")   # kind from KINDS: bedroom, single_bedroom,
+#     living, dining, kitchen, bathroom, corridor, laundry, store, service (minimum areas, programme, privacy checks)
+# entrance(x, y); private_room("Bedroom"); intimate("WC", "Bed_Frame") (screened from the entrance, every seat and
+#     every viewpoint("sofa", x, y, seated=True) / viewpoint("stair arrival", x, y) you declare)
+# requirement("R01", "text from brief.md", ("Category/Element pattern", ...), ("object", ...))
+#     or manual=True (review pending) / manual="reviews/<file>.md" (the review that judged it, must cite the id)
+# accepted("Category/Element*", by="client name", date="YYYY-MM-DD", reason="..."): only the client accepts a defect
 PARAMS = globals().get("PARAMS", {})   # values varied by tools/explore.py, e.g. PARAMS.get("table_x", 5.0)
 
 if PHASE >= 2:
     # ======================= PHASE 2 - MAIN FURNITURE (beds, sofas, tables, kitchen, wardrobes) =======================
-    # Register each piece's USE: chair()/seat(), access_zone(), clearance(), destination(), tv(), height_match()
+    # Register each piece's USE: chair()/seat(), access_zone(), clearance(kind="corridor|passage|aisle|bed_side"),
+    # appliance_zone(..., front, own, kind="dishwasher|oven|drawer"), destination(), tv(), height_match()
     pass
 
 if PHASE >= 3:

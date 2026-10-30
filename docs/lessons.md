@@ -92,18 +92,21 @@ every night trip to the WC (8.2 m) and every visit to that bedroom crossed the r
 bed. The pre-mortem flagged it and the designer accepted it as a compromise; the user rejected it. Rule: bedrooms and
 the shared bathroom open onto circulation (hall, corridor, stair hall), never through a living, dining or family room;
 when the plan offers no corridor, carve one (1.00 m) before accepting the compromise, and state what it costs.
-Applied: `docs/method.md` par. 5, FMEA F22.
+Applied: `docs/method.md` par. 5, FMEA F22, `Privacy: entered from` check (room kinds) in `lib/interiors.py`,
+fixtures A, B and C.
 
 **L24 - Size service rooms on their contents, not on the leftover.** A blind room that could not host a habitable room
 became a 31 m2 laundry while the family room next to it had 15.6 m2: the whole leftover went to a function that needs
 6-8 m2. Rule: size laundry, storage and plant rooms on what they hold; give the rest to the rooms that need it (or
 declare it as storage on its own), and compare service and habitable areas before closing the layout. Applied:
-`docs/method.md` par. 5, `docs/design-rules.md` (minimum areas), FMEA F23.
+`docs/method.md` par. 5, `docs/design-rules.md` (minimum areas), FMEA F23, `Programme: area` check (`service_area`),
+fixture C.
 
 **L25 - Look from where people sit and arrive, not only from the front door.** The WC was visible from the sofa through
 the open bathroom door, and from a stair arrival: `verify()` passed because `no_view` was declared only from the entrance
 of each floor (layout review). Rule: declare `no_view` for WC and beds also from the main seats (sofa, table) and from
-every stair arrival. Applied: `AGENTS.md` conventions, FMEA F10.
+every stair arrival. Applied: `intimate()` + `viewpoint()` in `lib/interiors.py` (every `seat()` and the entrance are
+viewpoints by themselves), `AGENTS.md` conventions, FMEA F10, fixture C.
 
 **L26 - Zero problems is a gate, not the finish.** Three floors reached `TOTAL PROBLEMS: 0` with rooms furnished only with
 what a check needs (bed, wardrobe, sofa, TV, fixtures) and nothing of what the occupants need: an empty 3.3 m2 store, an
@@ -112,7 +115,8 @@ drawers, no coat storage, a 3.1 m kitchen without wall units or pantry. The chec
 with little in it passes everything. Rule: before furniture goes in, write the room's programme row (functions from
 brief par. 2-4: sleep, store N m, study, sit N, cook, eat N, dry, clean) and give every function an object; a room with
 no object, or only with check-driven objects, is a defect to report; floor occupancy has a lower bound to look at as
-well as the 40% upper bound. Applied: `furnishing` skill steps 2 and 4, method par. 4 and 7, FMEA F24.
+well as the 40% upper bound. Applied: `furnishing` skill steps 2 and 4, method par. 4 and 7, FMEA F24, `occupancy_min`
+and `Programme: contents` checks, fixture C.
 
 **L27 - Count the beds, the seats and the metres, and never bend the brief to the model.** The brief said two children in
 the semi-basement; the model gave them one double and one single bed, and the brief's "Sleep" row was then rewritten to
@@ -127,7 +131,8 @@ that exists in neither the model nor the brief, with "pull-out rails", a "foldin
 and marked 16 of 37 stories "founded but accepted"; the user rejected the first one they read. Rule: a fix that is an
 object gets modelled before the verdict; a fix that is a specification becomes a `not_verifiable()` or a plan label;
 "founded but accepted" is a proposal to the user, who decides, never a verdict the designer gives on their behalf.
-Applied: `pre-mortem` skill step 3, FMEA F26.
+Applied: `pre-mortem` skill step 3, FMEA F26, `accepted()` and the ACCEPTED status in `lib/interiors.py` (a stale
+acceptance is reported), `requirement(manual="reviews/...")` resolved at verification, fixture C.
 
 **L29 - An appliance zone is the open door plus the person.** Dishwasher, oven and fridge zones were drawn 70 cm deep
 from the closed unit's face; a 0.96 m aisle to an island passed every check while a dishwasher door down (60 cm) left
@@ -138,5 +143,9 @@ Correction status (2026-10-29): `appliance_zone()` now includes the projection p
 `projects/apartment-100sqm/project.py` uses it for the dishwasher and oven. The headless baseline run on that date
 reports zero blocking/significant failures for that example. The Japandi variant was also migrated to the helper in
 concurrent layout work, but its complete re-verification is separate. Remaining coverage gap: imported-plan semantics
-still generate generic 70 cm appliance zones. That path is not covered by the example correction.
-Applied: `docs/design-rules.md`, FMEA F18, `furnishing` skill step 2.
+still generate generic 70 cm appliance zones. That path is not covered by the example correction. Later the same day
+the helper caught two more: the oven zone against the island in `apartment-100sqm` (island shortened and moved, table
+5 cm east) and the dishwasher in the 1.20 m galley of `apartment-100sqm-japandi` (peninsula moved 15 cm south,
+dishwasher next to the sink in the north run); both re-verified at zero.
+Applied: `appliance_zone(kind=)` with the projections in `RULES` (`appliance_door`), `docs/design-rules.md` DR25/DR40,
+FMEA F18, `furnishing` skill step 2, fixture C (C3).

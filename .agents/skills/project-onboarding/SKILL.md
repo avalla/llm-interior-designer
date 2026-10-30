@@ -14,7 +14,8 @@ Reference method: [`docs/method.md`](../../../docs/method.md), sections 1-2.
 1. **Starting files.** Ask for the available files: DWG/DXF, scaled PDF, photos, survey, data sheets of furniture to keep.
    Copy them into `projects/<short-name>/input/` (excluded from git: client data). For DWG/DXF run
    `uv run --with ezdxf python tools/read_plan.py <file>` and note units, extents, dimensions and off-square segments.
-   For unscaled PDFs/photos state that dimensions will be `estimated` and ask for at least one known dimension.
+   For unscaled PDFs/photos state that dimensions will be `estimated` and ask for at least one known dimension: an
+   unscaled source used as measured puts the whole layout wrong on site (FMEA F17).
    Done when you know which dimensions are `measured`/`documented` and which are not.
 
 2. **Blocking questions.** Ask together (with the harness question tool if there is one, e.g. `AskUserQuestion` in Claude
@@ -42,9 +43,11 @@ Reference method: [`docs/method.md`](../../../docs/method.md), sections 1-2.
    programme item, constraint and forbidden element into a requirement with a stable id (`R01`, `R02`, ...).
    Done when every requirement has an id, a priority and a source.
 
-5. **Survey (PHASE 1).** In `project.py`: `new_project()` with `interior` and height, then windows, doors, walls, rooms,
-   `entrance()`, `private_room()` for bedrooms, `no_view()` from the entrance towards WC and beds, furniture to keep, and one
-   `requirement()` per brief requirement, linked to the checks that prove it (or `manual=True`). Run it in FreeCAD, look
+5. **Survey (PHASE 1).** In `project.py`: `new_project()` with `interior` and height, then windows, doors, walls, rooms
+   (each with its `kind`), `entrance()` (on a multi-storey project, one `floor_<name>()` per floor with the stair
+   arrival as its entrance), `private_room()` for bedrooms, `intimate()` for WC and beds and a `viewpoint()` for every
+   sofa and stair arrival, furniture to keep, and one `requirement()` per brief requirement, linked to the checks that
+   prove it (or `manual=True` until a review judges it). Run it in FreeCAD, look
    at the top screenshot and compare: every source dimension matches the model (same extents, same openings).
    Differences go into the assumption log. Done when `verify()` runs and the dimensions match.
 

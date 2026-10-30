@@ -27,12 +27,14 @@ licensed professionals. Every project's report explicitly lists what could not b
   | Access zones | 70 cm clear in front of wardrobes and cabinets |
   | Clearances | minimum and comfort widths between pairs of elements |
   | Routes | every use zone reachable from the entrance with a continuous 60 cm (5 cm grid) |
-  | Light and air | windows >= 1/8 of the floor, bathroom ventilation, room crowding |
+  | Light and air | windows >= 1/8 of the floor, bathroom ventilation, room occupancy between 10% and 40% |
+  | Programme | minimum areas by room kind, service rooms with nothing in them, laundries sized on the leftover |
   | Brief constraints | e.g. TV not next to a window on the same wall |
   | Ergonomics | seat height matching the surface |
   | Assembly | tall wardrobes can be tilted up in the room |
   | Safety | no electrical item in the splash zone of an open shower or bath side |
-  | Privacy | shared rooms reachable without crossing bedrooms; WC and bed not visible from the entrance |
+  | Privacy | shared rooms reachable without crossing bedrooms; bedrooms and bathrooms entered from circulation, not through a living room; WC and beds not visible from the entrance, any seat or declared viewpoint |
+  | Acceptance | a non-compliant result the client accepted (who, when, why) is ACCEPTED, not a problem; a stale acceptance is reported |
   | Robustness | no measure at zero margin: everything survives a 2 cm placement tolerance per element |
   | Requirements | every brief requirement (R01...) traced to the checks that prove it |
   | Geometry | no object intersecting another or a wall |

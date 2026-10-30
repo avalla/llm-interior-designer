@@ -1,0 +1,182 @@
+{
+  "description": "Defects of lessons L23-L29 (programme, privacy from seats, appliance zones, acceptances) that verify() must report and a review should mention.",
+  "defects": [
+    {
+      "id": "C1",
+      "text": "WC in view from the entrance, straight down the hall through the open bathroom door",
+      "engine": [
+        "Privacy/WC from entrance"
+      ],
+      "keywords": [
+        [
+          "wc",
+          "toilet"
+        ],
+        [
+          "entrance",
+          "front door",
+          "hall"
+        ],
+        [
+          "visible",
+          "view",
+          "sight*",
+          "see*"
+        ]
+      ]
+    },
+    {
+      "id": "C2",
+      "text": "Bed of Bedroom 1 in view from the dining chairs and the sofa through the open bedroom door",
+      "engine": [
+        "Privacy/Bed_1_Frame from *"
+      ],
+      "keywords": [
+        [
+          "bed"
+        ],
+        [
+          "chair*",
+          "dining",
+          "table",
+          "sofa",
+          "living"
+        ],
+        [
+          "visible",
+          "view",
+          "sight*",
+          "see*"
+        ]
+      ]
+    },
+    {
+      "id": "C3",
+      "text": "Dishwasher door down plus a person hits the island: the 1.20 m aisle passes, the appliance zone does not",
+      "engine": [
+        "Access zones/Kitchen: dishwasher (dishwasher door open + person)"
+      ],
+      "keywords": [
+        [
+          "dishwasher"
+        ],
+        [
+          "island"
+        ],
+        [
+          "open",
+          "door",
+          "zone",
+          "person",
+          "stand*",
+          "aisle"
+        ]
+      ]
+    },
+    {
+      "id": "C4",
+      "text": "Bedroom 2 holds only a single bed: 18.9 m2 under-furnished (no wardrobe, no desk, no nightstand)",
+      "engine": [
+        "Light and air/Bedroom 2 - occupancy"
+      ],
+      "keywords": [
+        [
+          "bedroom 2"
+        ],
+        [
+          "empty",
+          "bare",
+          "under*",
+          "only",
+          "wardrobe",
+          "storage",
+          "desk",
+          "nightstand"
+        ]
+      ]
+    },
+    {
+      "id": "C5",
+      "text": "Laundry of 13 m2 sized on the leftover, not on its contents",
+      "engine": [
+        "Programme/Laundry - area"
+      ],
+      "keywords": [
+        [
+          "laundry"
+        ],
+        [
+          "oversized",
+          "too large",
+          "too big",
+          "large",
+          "big",
+          "leftover",
+          "13",
+          "m2"
+        ]
+      ]
+    },
+    {
+      "id": "C6",
+      "text": "Store room of 5.5 m2 with nothing in it",
+      "engine": [
+        "Programme/Store - contents"
+      ],
+      "keywords": [
+        [
+          "store",
+          "storage room",
+          "storeroom"
+        ],
+        [
+          "empty",
+          "nothing",
+          "no shel*",
+          "unfurnished",
+          "bare"
+        ]
+      ]
+    },
+    {
+      "id": "C8",
+      "text": "A client acceptance that matches no failing check (stale: the defect is gone or the pattern is wrong)",
+      "engine": [
+        "Acceptance/Seats/Chair_Nowhere*"
+      ],
+      "keywords": [
+        [
+          "accept*"
+        ],
+        [
+          "stale",
+          "no failing",
+          "nothing",
+          "matches no",
+          "no longer",
+          "chair_nowhere"
+        ]
+      ]
+    },
+    {
+      "id": "C9",
+      "text": "Bedroom 1 (double) below the 14 m2 reference",
+      "engine": [
+        "Programme/Bedroom 1 - area"
+      ],
+      "keywords": [
+        [
+          "bedroom 1"
+        ],
+        [
+          "14",
+          "13.2",
+          "small",
+          "minimum",
+          "area",
+          "m2"
+        ]
+      ]
+    }
+  ]
+}

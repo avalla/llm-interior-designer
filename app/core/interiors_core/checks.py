@@ -10,8 +10,10 @@ import shapely
 from shapely.geometry import LineString, Polygon
 
 from . import geom
+from .rules import HABITABLE, THROUGH
 
 VERIFIED, NON_COMPLIANT, NOT_VERIF, NOT_APPL = "VERIFIED", "NON-COMPLIANT", "NOT VERIFIABLE", "NOT APPLICABLE"
+ACCEPTED = "ACCEPTED"
 SEVERITY = ("blocking", "significant", "improvement")
 CELL = 0.05
 
@@ -42,6 +44,8 @@ class Model:
         self.windows = [dict(w, glass=sh(w["glass"])) for w in data["windows"]]
         self.wet = [dict(w, zone=sh(w["zone"])) for w in data["wet"]]
         self.private, self.views, self.reqs = data["private"], data["views"], data["requirements"]
+        self.viewpoints, self.intimate = data.get("viewpoints", []), data.get("intimate", [])
+        self.accepted = data.get("accepted", [])
         self.notverif = data["not_verifiable"]
         self.start = tuple(data["start"]) if data["start"] else None
         self.targets = {k: tuple(v) for k, v in data["targets"].items()}
@@ -87,6 +91,21 @@ class Model:
                 if x0 <= x <= x1 and y0 <= y <= y1:
                     return r["name"]
         return "-"
+
+    def entered_from(self, nx, ny, dist, k, room):
+        """Room the route from the entrance comes from when it enters `room` (same walk as the FreeCAD engine, L23)."""
+        X0, Y0 = self.interior[0], self.interior[1]
+        while dist[k] > 0:
+            i, j = k % nx, k // nx
+            for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                a, b = i + di, j + dj
+                if 0 <= a < nx and 0 <= b < ny and dist[b * nx + a] == dist[k] - 1:
+                    k = b * nx + a
+                    break
+            rn = self.room_of(X0 + (k % nx + 0.5) * CELL, Y0 + (k // nx + 0.5) * CELL)
+            if rn not in (room, "-"):
+                return rn
+        return "the entrance"
 
     # 1) leaves, windows, sliding doors; 2) handles; 3) reveals
     def openings(self):
@@ -291,10 +310,13 @@ class Model:
                                 tot += 1
                                 cells += occ[j * onx + i]
                 ratio = cells / tot if tot else 0
+                low = ratio < R["occupancy_min"] - 1e-6
                 self._r("Light and air", r["name"] + " - occupancy", "%.0f%% of the floor" % (ratio * 100),
-                        "<= %.0f%%" % (R["occupancy"] * 100), VERIFIED,
-                        "improvement" if ratio > R["occupancy"] else "", "floor-standing footprint on a 5 cm grid",
-                        "crowded room" if ratio > R["occupancy"] else "")
+                        "%.0f-%.0f%%" % (R["occupancy_min"] * 100, R["occupancy"] * 100), NC if low else VERIFIED,
+                        "significant" if low else ("improvement" if ratio > R["occupancy"] else ""),
+                        "floor-standing footprint on a 5 cm grid",
+                        "under-furnished: only what a check needs? (L26)" if low else
+                        ("crowded room" if ratio > R["occupancy"] else ""))
             elif r["kind"] == "bathroom":
                 self._r("Light and air", r["name"], "window %.2f m2" % glazed if win else "no window",
                         "window or mechanical ventilation", VERIFIED if win else NOT_VERIF, "" if win else "significant",
@@ -302,17 +324,43 @@ class Model:
             else:
                 self._r("Light and air", r["name"], "-", "non-habitable room", NOT_APPL, "", "-")
 
+    # 7b) programme by room kind (L24, L26); imported plans without a kind are skipped
+    def programme(self):
+        R, NC = self.R, NON_COMPLIANT
+        centres = [((x0 + x1) / 2, (y0 + y1) / 2) for x0, y0, _z0, x1, y1, _z1, _g in self.items().values()]
+        for r in self.rooms:
+            k = r.get("kind", "")
+            if k in R["min_area"]:
+                need = R["min_area"][k]
+                ok = r["area"] >= need - 1e-6
+                self._r("Programme", r["name"] + " - area", "%.1f m2" % r["area"],
+                        ">= %.1f m2 (%s, indicative)" % (need, k.replace("_", " ")), VERIFIED if ok else NC,
+                        "" if ok else "significant", "net floor area by room kind")
+            if k in R["service_area"]:
+                lim = R["service_area"][k] * R["service_factor"]
+                ok = r["area"] <= lim + 1e-6
+                self._r("Programme", r["name"] + " - area", "%.1f m2" % r["area"],
+                        "<= %.1f m2 (%.0f x %.1f reference)" % (lim, R["service_factor"], R["service_area"][k]),
+                        VERIFIED if ok else NC, "" if ok else "significant",
+                        "net floor area against the reference of its contents",
+                        "" if ok else "sized on the leftover, not on its contents (L24)")
+            if k and k not in HABITABLE and k != "corridor":
+                n = sum(1 for cx, cy in centres if self.room_of(cx, cy) == r["name"])
+                self._r("Programme", r["name"] + " - contents", "%d objects" % n, ">= 1 object", VERIFIED if n else NC,
+                        "" if n else "significant", "furniture whose centre lies in the room",
+                        "" if n else "empty room: give it its programme or declare it (L26)")
+
     # 8) TV / window; 9) ergonomics; 10) assembly
     def tv_checks(self):
         R = self.R
         for name in self.tv:
             tvs = self.named[name]
             b = geom.bounds(tvs)
-            cy = (b[1] + b[4]) / 2
+            cx, cy = (b[0] + b[3]) / 2, (b[1] + b[4]) / 2
             worst = None
             for w in self.windows:
                 d = geom.distance(tvs, w["glass"])
-                same = abs(cy - w["yc"]) < 0.5
+                same = abs((cy if w.get("axis", "x") == "x" else cx) - w["yc"]) < 0.5   # yc: the wall's centre line
                 if worst is None or (same, -d) > (worst[0], -worst[1]):
                     worst = (same, d, w["name"])
             if worst is None:
@@ -370,14 +418,53 @@ class Model:
                 self._r("Privacy", lbl, "reachable without crossing %s" % ", ".join(self.private) if ok else
                         "reachable only through " + ", ".join(self.private), "shared zones never through a private room",
                         VERIFIED if ok else NON_COMPLIANT, "" if ok else "significant", "route search with private rooms blocked")
-        for v in self.views:
-            b = geom.bounds(self.named[v["target"]])
-            p0 = (v["eye"][0], v["eye"][1], v["eye_z"])
+        # 10b2) bedrooms and bathrooms entered from circulation, never through a living room (L23)
+        if self.start:
+            nx, ny = self._nx, self._ny
+            for r in self.rooms:
+                if r.get("kind", "") not in ("bedroom", "single_bedroom", "bathroom"):
+                    continue
+                inside = [(lbl, xy) for lbl, xy in self.targets.items() if self.room_of(*xy) == r["name"]]
+                if not inside:
+                    continue
+                lbl, (x, y) = inside[0]
+                c = self.cell(x, y, nx, ny)
+                k = c[1] * nx + c[0] if c else None
+                if k is None or self._dist_start[k] < 0:
+                    continue
+                via = self.entered_from(nx, ny, self._dist_start, k, r["name"])
+                bad = next((q.get("kind", "") for q in self.rooms if q["name"] == via), "") in THROUGH
+                self._r("Privacy", r["name"] + ": entered from", via, "a hall, corridor or stair hall, never a living room",
+                        NON_COMPLIANT if bad else VERIFIED, "significant" if bad else "",
+                        "room before the door on the route from the entrance (to %s)" % lbl,
+                        "the living room is a corridor (L23)" if bad else "")
+
+        def seen(ex, ey, ez, b):
             p1 = ((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2)
-            blocked = [w for w, ws in self.walls if _segment_hits(p0, p1, ws)]
+            return [w for w, ws in self.walls if _segment_hits((ex, ey, ez), p1, ws)]
+
+        for v in self.views:
+            blocked = seen(v["eye"][0], v["eye"][1], v["eye_z"], geom.bounds(self.named[v["target"]]))
             self._r("Privacy", v["label"], ("blocked by " + blocked[0]) if blocked else "visible", "not visible with doors open",
                     VERIFIED if blocked else NON_COMPLIANT, "" if blocked else "significant",
                     "3D sightline eye -> object centre vs walls")
+        # 10c2) intimate objects from every viewpoint (L25); eyes in the object's own room do not count
+        for target in self.intimate:
+            if target not in self.named:
+                self._r("Privacy", target + " from viewpoints", "object missing", "intimate object exists", NON_COMPLIANT,
+                        "blocking", "object lookup")
+                continue
+            b = geom.bounds(self.named[target])
+            home = self.room_of((b[0] + b[3]) / 2, (b[1] + b[4]) / 2)
+            for vp in self.viewpoints:
+                eyes = [e for e in vp["eyes"] if self.room_of(e[0], e[1]) != home]
+                if not eyes:
+                    continue
+                vis = [who for ex, ey, ez, who in eyes if not seen(ex, ey, ez, b)]
+                self._r("Privacy", "%s from %s" % (target, vp["label"]),
+                        ("visible from " + ", ".join(vis)) if vis else "screened by walls", "not visible with doors open",
+                        NON_COMPLIANT if vis else VERIFIED, "significant" if vis else "",
+                        "3D sightline eye -> object centre vs walls (%d eyes)" % len(eyes))
 
     # 10d) robustness: margins smaller than the placement tolerance of two elements
     def robustness(self):
@@ -422,6 +509,22 @@ class Model:
         self._r("Geometry", "Furniture/wall interpenetrations", ", ".join(pairs) if pairs else "none", "none",
                 NON_COMPLIANT if pairs else VERIFIED, "blocking" if pairs else "", "pairwise 3D intersection")
 
+    # 11b) client acceptances (L28)
+    def acceptance(self):
+        NC = NON_COMPLIANT
+        for ac in self.accepted:
+            hit = [x for x in self.results if x["status"] == NC
+                   and fnmatch.fnmatch("%s/%s" % (x["cat"], x["elem"]), ac["pattern"])]
+            for x in hit:
+                x["status"] = ACCEPTED
+                x["note"] = (x["note"] + "; " if x["note"] else "") + "accepted by %s on %s: %s" % (
+                    ac["by"], ac["date"], ac["reason"])
+            self._r("Acceptance", ac["pattern"],
+                    "%d result(s) accepted by %s on %s" % (len(hit), ac["by"], ac["date"]) if hit else "no failing check matched",
+                    ">= 1 NON-COMPLIANT result", VERIFIED if hit else NC, "" if hit else "significant",
+                    "pattern against the results",
+                    ac["reason"] if hit else "stale acceptance: the defect is gone or the pattern is wrong (L28)")
+
     # 12) requirements traceability (brief -> design -> checks)
     def requirements(self):
         NC = NON_COMPLIANT
@@ -438,8 +541,13 @@ class Model:
                 self._r("Requirements", elem, "%d/%d linked checks failed" % (len(failed), len(linked)),
                         "all linked checks pass", NC, min((x["sev"] for x in failed), key=SEVERITY.index), "traceability",
                         ", ".join("%s/%s" % (x["cat"], x["elem"]) for x in failed))
-            elif rq["manual"]:
+            elif rq["manual"] is True:
                 self._r("Requirements", elem, "judged in review", "-", NOT_VERIF, "", "manual: review-layout / pre-mortem")
+            elif rq["manual"]:
+                ok = rq.get("manual_ok", False)          # resolved by the exporter (the core has no project folder)
+                self._r("Requirements", elem, "judged in %s" % rq["manual"] if ok else
+                        "review %s missing or without %s" % (rq["manual"], rq["id"]), "review file citing the id",
+                        VERIFIED if ok else NC, "" if ok else "significant", "manual: review file")
             elif not linked:
                 self._r("Requirements", elem, "no linked check", ">= 1 automatic check", NC, "significant", "traceability",
                         "add a check or mark the requirement manual")
@@ -456,6 +564,7 @@ class Model:
         self.clearances()
         self.route_checks()
         self.rooms_checks()
+        self.programme()
         self.tv_checks()
         self.ergonomics()
         self.assembly()
@@ -463,6 +572,7 @@ class Model:
         self.privacy()
         self.robustness()
         self.geometry()
+        self.acceptance()
         self.requirements()
         return self.results
 

@@ -3,6 +3,7 @@
 # Same rows in the same order, same status and severity, same measure text; numbers may differ by one unit of the
 # last printed digit (float rounding), collision volumes "(N cm3)" by up to 5 cm3 or 0.1% (arcs are discretised).
 import glob
+import json
 import os
 import re
 import sys
@@ -44,7 +45,7 @@ if os.path.exists(ERR):
 failed_models, rows, nc_rows, total_ms = [], 0, 0, 0.0
 for p in paths:
     m = Model.load(p)
-    if {k: list(v) if isinstance(v, (list, tuple)) else v for k, v in RULES.items()} != m.R:
+    if json.loads(json.dumps(RULES)) != m.R:        # tuples become lists on the JSON round trip, as in the model
         sys.exit("interiors_core/rules.py differs from lib/interiors.py RULES (model %s): align them" % m.name)
     t = time.perf_counter()
     new = m.verify()

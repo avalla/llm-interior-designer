@@ -150,6 +150,13 @@ def true_front(item, p, kind):
     c = p.centroid
     zone = next((plan(a["zone"]) for a in m["access"] if a["own"] and a["own"][0] == item), None)
     if zone is not None and not zone.is_empty:
+        # the face the zone lies beyond (a narrow appliance zone at one end of a long run has its centroid off-axis)
+        zx0, zy0, zx1, zy1 = zone.bounds
+        bx0, by0, bx1, by1 = p.bounds
+        for face, cond in (((0, 1), zy0 >= by1 - 0.10), ((0, -1), zy1 <= by0 + 0.10),      # 10 cm: a worktop
+                           ((1, 0), zx0 >= bx1 - 0.10), ((-1, 0), zx1 <= bx0 + 0.10)):      # overhangs its units
+            if cond:
+                return face
         return axis(zone.centroid.x - c.x, zone.centroid.y - c.y)
     seat = next((s for s in m["seats"] if s["name"] == item), None)
     if seat:

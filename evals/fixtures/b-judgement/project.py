@@ -32,9 +32,9 @@ wall("Partition_Living", 4.40, 0.3, 4.50, 5.7)
 wall("Partition_Bathroom", 4.50, 3.40, 7.70, 3.50)
 box("Slab", 0, 0, -0.2, 8.0, 6.0, 0, c["FLOOR"], "Structure", check=False)
 
-room("Living", [(0.30, 0.30, 4.40, 5.70)], (2.0, 3.3))
-room("Bedroom", [(4.50, 0.30, 7.70, 3.40)], (6.9, 2.9))
-room("Bathroom", [(4.50, 3.50, 7.70, 5.70)], (6.0, 4.4), habitable=False, kind="bathroom")
+room("Living", [(0.30, 0.30, 4.40, 5.70)], (2.0, 3.3), kind="living")
+room("Bedroom", [(4.50, 0.30, 7.70, 3.40)], (6.9, 2.9), kind="bedroom")
+room("Bathroom", [(4.50, 3.50, 7.70, 5.70)], (6.0, 4.4), kind="bathroom")
 private_room("Bedroom")
 
 g = "Living"
